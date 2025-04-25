@@ -10,7 +10,7 @@ By participating in this project, you agree to abide by our Code of Conduct. Ple
 
 ### Reporting Bugs
 
-If you find a bug in the SDK, please create an issue on our [GitHub repository](https://github.com/coinpaprika/dexpaprika-sdk-js/issues) with the following information:
+If you find a bug in the SDK, please create an issue on our [GitHub repository](https://github.com/coinpaprika/dexpaprika-sdk-ts/issues) with the following information:
 
 - A clear, descriptive title
 - Steps to reproduce the issue
@@ -44,8 +44,8 @@ We welcome suggestions for improvements! Please create an issue with:
 
 ```bash
 # Clone your fork
-git clone https://github.com/YOUR_USERNAME/dexpaprika-sdk-js.git
-cd dexpaprika-sdk-js
+git clone https://github.com/YOUR_USERNAME/dexpaprika-sdk-ts.git
+cd dexpaprika-sdk-ts
 
 # Install dependencies
 npm install

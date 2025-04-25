@@ -296,7 +296,7 @@ MIT
 
 ## Contributing
 
-Contributions are welcome! Please read our [contributing guidelines](https://github.com/coinpaprika/dexpaprika-sdk-js/blob/main/CONTRIBUTING.md) before submitting a Pull Request.
+Contributions are welcome! Please read our [contributing guidelines](https://github.com/coinpaprika/dexpaprika-sdk-ts/blob/main/CONTRIBUTING.md) before submitting a Pull Request.
 
 ## Development and Testing
 
@@ -320,7 +320,7 @@ All test files are located in the `tests/` directory:
 ## Support
 
 For issues, questions, or feedback, please:
-- Open an issue on our [GitHub repository](https://github.com/coinpaprika/dexpaprika-sdk-js/issues)
+- Open an issue on our [GitHub repository](https://github.com/coinpaprika/dexpaprika-sdk-ts/issues)
 - Reach out to the DexPaprika team at [support@coinpaprika.com](mailto:support@coinpaprika.com)
 
 ## Disclaimer
