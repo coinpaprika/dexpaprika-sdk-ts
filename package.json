@@ -50,10 +50,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/coinpaprika/dexpaprika-sdk-js"
+    "url": "https://github.com/coinpaprika/dexpaprika-sdk-ts"
   },
   "bugs": {
-    "url": "https://github.com/coinpaprika/dexpaprika-sdk-js/issues"
+    "url": "https://github.com/coinpaprika/dexpaprika-sdk-ts/issues"
   },
-  "homepage": "https://github.com/coinpaprika/dexpaprika-sdk-js#readme"
+  "homepage": "https://github.com/coinpaprika/dexpaprika-sdk-ts#readme"
 }
