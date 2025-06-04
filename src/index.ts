@@ -21,4 +21,13 @@ export * from './models/options';
 
 // Utility exports
 export { RetryConfig, defaultRetryConfig, withRetry } from './utils/helpers';
-export { Cache, CacheConfig, defaultCacheConfig } from './utils/cache'; 
+export { Cache, CacheConfig, defaultCacheConfig } from './utils/cache';
+
+// Error class exports
+export { 
+  DexPaprikaError, 
+  NetworkNotFoundError, 
+  PoolNotFoundError, 
+  ApiError, 
+  DeprecatedEndpointError 
+} from './utils/errors'; 

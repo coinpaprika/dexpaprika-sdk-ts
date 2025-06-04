@@ -2,6 +2,53 @@
 
 All notable changes to the DexPaprika SDK will be documented in this file.
 
+## 1.4.0 (2025-01-27) - API v1.3.0 Support
+
+### Breaking Changes
+- **DEPRECATED**: Global `pools.list()` method due to API changes
+- **MIGRATION REQUIRED**: All pool queries now require network specification
+
+### Added
+- New error classes for better error handling:
+  - `DeprecatedEndpointError` for deprecated endpoints
+  - `NetworkNotFoundError` for invalid networks
+  - `PoolNotFoundError` for pool lookup failures
+  - `ApiError` for general API errors
+  - `DexPaprikaError` as base error class
+- Enhanced error handling for 410 Gone responses from deprecated endpoints
+- Better parameter validation in all pool-related methods
+
+### Changed
+- `pools.list()` now throws `DeprecatedEndpointError` with migration guidance
+- Improved error messages with specific migration instructions
+- Enhanced JSDoc documentation with deprecation warnings
+
+### Migration Guide
+```typescript
+// OLD (deprecated) - will throw DeprecatedEndpointError:
+const pools = await client.pools.list();
+
+// NEW (required) - specify network:
+const ethereumPools = await client.pools.listByNetwork('ethereum');
+const solanaPools = await client.pools.listByNetwork('solana');
+const fantomPools = await client.pools.listByNetwork('fantom');
+
+// Using options:
+const pools = await client.pools.listByNetwork('ethereum', {
+  page: 0,
+  limit: 20,
+  sort: 'desc',
+  orderBy: 'volume_usd'
+});
+```
+
+For more information about the API changes, visit: https://docs.dexpaprika.com/changelog/changelog
+
+## 1.3.2 (2025-05-03)
+
+### Changed
+- Updated dependencies to latest versions
+
 ## 1.3.0 (2025-04-24)
 
 ### Added

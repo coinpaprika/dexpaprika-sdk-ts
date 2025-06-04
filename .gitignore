@@ -7,6 +7,9 @@ yarn-error.log
 # TypeScript
 *.tsbuildinfo
 
+# Build output
+dist/
+
 # IDE
 .vscode/
 .idea/

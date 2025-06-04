@@ -8,11 +8,16 @@ export declare class BaseAPI {
      */
     constructor(client: DexPaprikaClient);
     /**
-     * Make a GET request.
+     * Make a GET request with enhanced error handling.
      *
      * @param endpoint - API endpoint
      * @param params - Query parameters
      * @returns Response data
+     * @throws {DeprecatedEndpointError} If endpoint returns 410 Gone
+     * @throws {NetworkNotFoundError} If network is not found
+     * @throws {PoolNotFoundError} If pool is not found
+     * @throws {ApiError} For other API errors
+     * @throws {DexPaprikaError} For general SDK errors
      */
     protected _get<T>(endpoint: string, params?: Record<string, any>): Promise<T>;
     /**

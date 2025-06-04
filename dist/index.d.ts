@@ -1,4 +1,4 @@
-export { DexPaprikaClient } from './client';
+export { DexPaprikaClient, ClientConfig } from './client';
 export { NetworksAPI } from './api/networks';
 export { PoolsAPI } from './api/pools';
 export { TokensAPI } from './api/tokens';
@@ -12,3 +12,7 @@ export * from './models/pools';
 export * from './models/search';
 export * from './models/tokens';
 export * from './models/utils';
+export * from './models/options';
+export { RetryConfig, defaultRetryConfig, withRetry } from './utils/helpers';
+export { Cache, CacheConfig, defaultCacheConfig } from './utils/cache';
+export { DexPaprikaError, NetworkNotFoundError, PoolNotFoundError, ApiError, DeprecatedEndpointError } from './utils/errors';

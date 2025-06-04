@@ -1,6 +1,7 @@
 import { BaseAPI } from './base';
 import { TokenDetails } from '../models/tokens';
 import { PoolPaginatedResponse } from '../models/base';
+import { TokenPoolsOptions } from '../models/options';
 /**
  * API service for token-related endpoints.
  */
@@ -18,12 +19,8 @@ export declare class TokensAPI extends BaseAPI {
      *
      * @param networkId - Network ID (e.g., "ethereum", "solana")
      * @param tokenAddress - Token address or identifier
-     * @param page - Page number for pagination
-     * @param limit - Number of items per page
-     * @param sort - Sort order ("asc" or "desc")
-     * @param orderBy - Field to order by ("volume_usd", "price_usd", "transactions", "last_price_change_usd_24h", "created_at")
-     * @param pairWith - Filter pools that contain this additional token address
+     * @param options - Options for pagination, sorting, and filtering
      * @returns Response containing a list of pools that include the specified token
      */
-    getPools(networkId: string, tokenAddress: string, page?: number, limit?: number, sort?: string, orderBy?: string, pairWith?: string): Promise<PoolPaginatedResponse>;
+    getPools(networkId: string, tokenAddress: string, options?: TokenPoolsOptions): Promise<PoolPaginatedResponse>;
 }

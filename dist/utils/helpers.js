@@ -1,9 +1,10 @@
 "use strict";
 // Utility functions
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sleep = exports.lastWeek = exports.yesterday = exports.now = exports.parseError = exports.formatVolume = void 0;
+exports.defaultRetryConfig = exports.sleep = exports.lastWeek = exports.yesterday = exports.now = exports.parseError = exports.formatVolume = void 0;
 exports.parseDate = parseDate;
 exports.formatPair = formatPair;
+exports.withRetry = withRetry;
 /**
  * Format currency with appropriate suffix
  */
@@ -53,3 +54,50 @@ exports.lastWeek = lastWeek;
 // Async delay utility
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 exports.sleep = sleep;
+/**
+ * Default retry configuration
+ */
+exports.defaultRetryConfig = {
+    maxRetries: 4,
+    delaySequenceMs: [100, 500, 1000, 5000], // Explicit sequence as requested
+    retryableStatuses: [408, 429, 500, 502, 503, 504]
+};
+/**
+ * Execute an operation with retry and specified delays
+ *
+ * @param operation - The async operation to execute
+ * @param config - Retry configuration
+ * @returns Result of the operation
+ * @throws Last error encountered if all retries fail
+ */
+async function withRetry(operation, config = {}) {
+    var _a;
+    const finalConfig = { ...exports.defaultRetryConfig, ...config };
+    let lastError;
+    // Try initial attempt plus retries
+    for (let attempt = 0; attempt <= finalConfig.maxRetries; attempt++) {
+        try {
+            // For attempts after the first one, wait using the specified delay
+            if (attempt > 0) {
+                const delayIndex = attempt - 1; // Adjust index to match delaySequence
+                const delay = finalConfig.delaySequenceMs[delayIndex] ||
+                    finalConfig.delaySequenceMs[finalConfig.delaySequenceMs.length - 1];
+                await (0, exports.sleep)(delay);
+            }
+            return await operation();
+        }
+        catch (error) {
+            lastError = error;
+            // Only retry on specified status codes or network errors
+            if (((_a = error.response) === null || _a === void 0 ? void 0 : _a.status) &&
+                !finalConfig.retryableStatuses.includes(error.response.status)) {
+                throw error;
+            }
+            // Don't continue if this was the last attempt
+            if (attempt === finalConfig.maxRetries) {
+                throw error;
+            }
+        }
+    }
+    throw lastError;
+}
