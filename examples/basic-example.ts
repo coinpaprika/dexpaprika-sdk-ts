@@ -18,9 +18,14 @@ async function main() {
     const stats = await client.utils.getStats();
     console.log(`Stats: ${stats.chains} chains, ${stats.pools} pools, ${stats.tokens} tokens`);
 
-    // Get top pools by volume
-    const poolsResp = await client.pools.list(0, 5, 'desc', 'volume_usd');
-    console.log('Top pools:');
+    // Get top pools on Ethereum by volume (updated to use network-specific method)
+    const poolsResp = await client.pools.listByNetwork('ethereum', {
+      page: 0,
+      limit: 5,
+      sort: 'desc',
+      orderBy: 'volume_usd'
+    });
+    console.log('Top Ethereum pools:');
     
     // Display pool information with formatting
     for (const pool of poolsResp.pools) {
@@ -40,9 +45,10 @@ async function main() {
       const history = await client.pools.getOHLCV(
         pool.chain, 
         pool.id, 
-        weekAgo, 
-        undefined, 
-        7
+        {
+          start: weekAgo,
+          limit: 7
+        }
       );
       
       if (history.length) {

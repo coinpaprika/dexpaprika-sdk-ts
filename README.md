@@ -13,6 +13,19 @@ Developed and maintained by [Coinpaprika](https://coinpaprika.com).
 npm install dexpaprika-sdk
 ```
 
+## Important: API v1.3.0 Migration Notice
+
+**⚠️ Breaking Changes in v1.4.0**: The global pools endpoint has been deprecated. All pool queries now require a network specification.
+
+```javascript
+// ❌ OLD (deprecated) - will throw DeprecatedEndpointError:
+const pools = await client.pools.list();
+
+// ✅ NEW (required) - specify network:
+const ethereumPools = await client.pools.listByNetwork('ethereum');
+const solanaPools = await client.pools.listByNetwork('solana');
+```
+
 ## Usage
 
 ```javascript
@@ -143,13 +156,17 @@ const dexes = await client.dexes.listByNetwork('ethereum', {
 ### Pools & Transactions
 
 ```js
-// Top pools with pagination
-const topPools = await client.pools.list({
+// Top pools on Ethereum with pagination
+const topPools = await client.pools.listByNetwork('ethereum', {
   page: 0,
   limit: 10,
   sort: 'desc',
   orderBy: 'volume_usd'
 });
+
+// Top pools on different networks
+const solanaPools = await client.pools.listByNetwork('solana', { limit: 5 });
+const fantomPools = await client.pools.listByNetwork('fantom', { limit: 5 });
 
 // Pool details
 const poolDetails = await client.pools.getDetails(
@@ -224,14 +241,34 @@ The SDK includes TypeScript types for easier development. See the documentation 
 
 ## Error Handling
 
-Basic error handling:
+The SDK includes specific error classes for better error handling:
 
 ```javascript
+import { 
+  DexPaprikaClient, 
+  DeprecatedEndpointError, 
+  NetworkNotFoundError,
+  PoolNotFoundError,
+  ApiError 
+} from 'dexpaprika-sdk';
+
+const client = new DexPaprikaClient();
+
 try {
+  // This will throw DeprecatedEndpointError
   const pools = await client.pools.list();
-  // Process results
 } catch (error) {
-  console.error('API error:', error.message);
+  if (error instanceof DeprecatedEndpointError) {
+    console.log('Migration required:', error.message);
+    // Use network-specific method instead
+    const pools = await client.pools.listByNetwork('ethereum');
+  } else if (error instanceof NetworkNotFoundError) {
+    console.log('Invalid network:', error.message);
+  } else if (error instanceof PoolNotFoundError) {
+    console.log('Pool not found:', error.message);
+  } else {
+    console.error('Other error:', error.message);
+  }
 }
 ```
 
@@ -241,7 +278,8 @@ Using the error helper:
 import { parseError } from 'dexpaprika-sdk/dist/utils/helpers';
 
 try {
-  // API calls
+  const pools = await client.pools.listByNetwork('ethereum');
+  // Process results
 } catch (err) {
   console.error(parseError(err));
 }
@@ -314,7 +352,7 @@ npm run test:all
 ```
 
 All test files are located in the `tests/` directory:
-- `test-after-fixes.ts` - Basic API functionality tests
+- `test-basic.ts` - Basic API functionality tests
 - `test-real-world.ts` - Tests with actual API calls and simulated failures
 
 ## Support

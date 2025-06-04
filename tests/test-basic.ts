@@ -23,12 +23,12 @@ async function main() {
     });
     console.log(`Got ${dexes.dexes.length} ETH dexes`);
     
-    // Get some top pools
-    const pools = await client.pools.list({
+    // Get some top pools on Ethereum (updated to use network-specific method)
+    const pools = await client.pools.listByNetwork('ethereum', {
       page: 0,
       limit: 3
     });
-    console.log(`Got ${pools.pools.length} top pools`);
+    console.log(`Got ${pools.pools.length} top pools on Ethereum`);
     
     if (pools.pools.length > 0) {
       // Check first pool details
