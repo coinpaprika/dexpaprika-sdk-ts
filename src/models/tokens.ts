@@ -147,7 +147,65 @@ export interface TokenSocialData {
 export interface TokenTimeInterval {
   time_start: string;
   time_end: string;
-  price_change: number; 
+  price_change: number;
   volume: number;
   txns: number;
+}
+
+// Time interval metrics for top tokens (lighter version)
+export interface TopTokenTimeMetrics {
+  volume_usd: number;
+  txns: number;
+  last_price_usd_change?: number;
+  buys?: number;
+  sells?: number;
+}
+
+// Token from the top tokens endpoint
+export interface TopToken {
+  address: string;
+  name: string;
+  symbol: string;
+  chain: string;
+  decimals: number;
+  has_image?: boolean;
+  price_usd?: number;
+  fdv?: number;
+  liquidity_usd?: number;
+  pools?: number;
+  '24h'?: TopTokenTimeMetrics;
+  '1h'?: TopTokenTimeMetrics;
+  '5m'?: TopTokenTimeMetrics;
+}
+
+// Paginated response for top tokens
+export interface TopTokensPaginatedResponse {
+  tokens: TopToken[];
+  page_info: import('./base').PageInfo;
+}
+
+// Token from the filter endpoint
+export interface FilteredToken {
+  chain: string;
+  address: string;
+  price_usd?: number;
+  volume_usd_24h?: number;
+  volume_usd_7d?: number;
+  liquidity_usd?: number;
+  fdv_usd?: number;
+  txns_24h?: number;
+  created_at?: string;
+}
+
+// Paginated response for filtered tokens
+export interface TokenFilterPaginatedResponse {
+  results: FilteredToken[];
+  page_info: import('./base').PageInfo;
+}
+
+// Token price from multi-prices endpoint
+export interface TokenPrice {
+  chain: string;
+  id: string;
+  price_usd?: number;
 } 
