@@ -225,6 +225,48 @@ const pools = await client.tokens.getPools(
 );
 ```
 
+### Pool Filtering
+
+```js
+// Find high-volume pools on Ethereum
+const filtered = await client.pools.filter('ethereum', {
+  volume24hMin: 100000,
+  txns24hMin: 50,
+  sortBy: 'volume_24h',
+  sortDir: 'desc',
+  limit: 10
+});
+console.log(`Found ${filtered.results.length} pools matching criteria`);
+```
+
+### Top Tokens & Token Filtering
+
+```js
+// Get top tokens by volume
+const topTokens = await client.tokens.getTop('ethereum', {
+  orderBy: 'volume_24h',
+  limit: 10
+});
+
+// Filter tokens by criteria
+const filtered = await client.tokens.filter('ethereum', {
+  volume24hMin: 100000,
+  fdvMin: 1000000,
+  limit: 10
+});
+```
+
+### Batch Token Prices
+
+```js
+// Get prices for multiple tokens in one request (max 10)
+const prices = await client.tokens.getMultiPrices('ethereum', [
+  '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', // WETH
+  '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48', // USDC
+]);
+prices.forEach(p => console.log(`${p.id}: $${p.price_usd}`));
+```
+
 ### Search & Stats
 
 ```js

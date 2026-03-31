@@ -29,11 +29,13 @@ export interface Pool {
   created_at_block_number: number;
   transactions: number;
   price_usd: number;
-  last_price_change_usd_5m: number;
-  last_price_change_usd_1h: number;
-  last_price_change_usd_24h: number;
-  fee?: number; // trading fee %
+  last_price_change_usd_5m?: number | null;
+  last_price_change_usd_1h?: number | null;
+  last_price_change_usd_24h?: number | null;
+  fee?: number | null;
   tokens: Token[];
+  volume_usd_7d?: number;
+  liquidity_usd?: number;
 }
 
 // alias for backward compat

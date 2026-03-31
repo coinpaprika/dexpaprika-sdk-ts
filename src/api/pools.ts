@@ -1,14 +1,15 @@
 import { BaseAPI } from './base';
-import { 
-  PoolDetails, 
+import {
+  PoolDetails,
   OHLCVRecord
 } from '../models/pools';
-import { PoolPaginatedResponse } from '../models/base';
-import { 
-  PoolListOptions, 
-  OHLCVOptions, 
-  PoolDetailsOptions, 
-  TransactionOptions 
+import { PoolPaginatedResponse, PoolFilterPaginatedResponse } from '../models/base';
+import {
+  PoolListOptions,
+  OHLCVOptions,
+  PoolDetailsOptions,
+  TransactionOptions,
+  PoolFilterOptions,
 } from '../models/options';
 import { DeprecatedEndpointError } from '../utils/errors';
 
@@ -196,10 +197,45 @@ export class PoolsAPI extends BaseAPI {
    * @returns List of pool transactions
    */
   getTransactions(
-    networkId: string, 
-    poolAddress: string, 
+    networkId: string,
+    poolAddress: string,
     options?: TransactionOptions
   ) {
     return this.getTxs(networkId, poolAddress, options);
+  }
+
+  /**
+   * Filter pools on a network by volume, liquidity, transactions, and creation date.
+   *
+   * @param networkId - Network identifier (e.g., 'ethereum', 'solana')
+   * @param options - Filter criteria and pagination options
+   * @returns Filtered pools with pagination info
+   */
+  async filter(
+    networkId: string,
+    options?: PoolFilterOptions
+  ): Promise<PoolFilterPaginatedResponse> {
+    if (!networkId) {
+      throw new Error('Network ID is required');
+    }
+
+    const params: Record<string, any> = {
+      page: options?.page ?? 1,
+      limit: options?.limit ?? 10,
+      sort_by: options?.sortBy ?? 'volume_24h',
+      sort_dir: options?.sortDir ?? 'desc',
+    };
+
+    if (options?.volume24hMin !== undefined) params.volume_24h_min = options.volume24hMin;
+    if (options?.volume24hMax !== undefined) params.volume_24h_max = options.volume24hMax;
+    if (options?.volume7dMin !== undefined) params.volume_7d_min = options.volume7dMin;
+    if (options?.volume7dMax !== undefined) params.volume_7d_max = options.volume7dMax;
+    if (options?.liquidityUsdMin !== undefined) params.liquidity_usd_min = options.liquidityUsdMin;
+    if (options?.liquidityUsdMax !== undefined) params.liquidity_usd_max = options.liquidityUsdMax;
+    if (options?.txns24hMin !== undefined) params.txns_24h_min = options.txns24hMin;
+    if (options?.createdAfter !== undefined) params.created_after = options.createdAfter;
+    if (options?.createdBefore !== undefined) params.created_before = options.createdBefore;
+
+    return this._get<PoolFilterPaginatedResponse>(`/networks/${networkId}/pools/filter`, params);
   }
 }

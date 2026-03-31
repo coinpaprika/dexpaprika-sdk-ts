@@ -28,3 +28,9 @@ export interface PoolPaginatedResponse {
   pools: Pool[];
   page_info: PageInfo;
 }
+
+// pool filter response (uses 'results' key)
+export interface PoolFilterPaginatedResponse {
+  results: Pool[];
+  page_info: PageInfo;
+}

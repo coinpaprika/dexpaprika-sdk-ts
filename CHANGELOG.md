@@ -2,6 +2,21 @@
 
 All notable changes to the DexPaprika SDK will be documented in this file.
 
+## 1.5.0 (2026-03-31)
+
+### Added
+- **Pool filtering**: `pools.filter()` method for advanced pool filtering by volume, liquidity, transactions, and creation date
+- **Top tokens**: `tokens.getTop()` method for discovering top tokens on a network ranked by volume, price, liquidity, or other metrics
+- **Token filtering**: `tokens.filter()` method for filtering tokens by volume, liquidity, FDV, transactions, and creation date
+- **Batch prices**: `tokens.getMultiPrices()` method for getting prices of up to 10 tokens in a single request
+- New TypeScript interfaces: `PoolFilterOptions`, `TopTokensOptions`, `TokenFilterOptions`, `PoolFilterPaginatedResponse`, `TopToken`, `TopTokenTimeMetrics`, `TopTokensPaginatedResponse`, `FilteredToken`, `TokenFilterPaginatedResponse`, `TokenPrice`
+- Optional `volume_usd_7d` and `liquidity_usd` fields on `Pool` interface
+- Test suite for all new endpoints
+
+### Changed
+- Pool price change fields are now optional (nullable) to match API behavior
+- Updated SDK version to 1.5.0
+
 ## 1.4.0 (2025-01-27) - API v1.3.0 Support
 
 ### Breaking Changes
