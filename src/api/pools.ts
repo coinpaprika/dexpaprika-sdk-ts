@@ -184,7 +184,9 @@ export class PoolsAPI extends BaseAPI {
     };
     
     if (options?.cursor) params.cursor = options.cursor;
-    
+    if (options?.from !== undefined) params.from = options.from;
+    if (options?.to !== undefined) params.to = options.to;
+
     return this._get(`/networks/${networkId}/pools/${poolAddress}/transactions`, params);
   }
   
