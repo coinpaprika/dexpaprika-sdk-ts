@@ -51,6 +51,10 @@ export interface PoolDetailsOptions {
 export interface TransactionOptions extends PaginationOptions {
   /** Cursor for paginated results */
   cursor?: string;
+  /** Filter transactions starting from this UNIX timestamp (inclusive). Results capped to last 7 days. */
+  from?: number;
+  /** Filter transactions up to this UNIX timestamp (exclusive). Must be after `from`. */
+  to?: number;
 }
 
 /**
