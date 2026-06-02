@@ -191,6 +191,7 @@ export interface FilteredToken {
   price_usd?: number;
   volume_usd_24h?: number;
   volume_usd_7d?: number;
+  volume_usd_30d?: number;
   liquidity_usd?: number;
   fdv_usd?: number;
   txns_24h?: number;
