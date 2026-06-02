@@ -38,6 +38,29 @@ export interface Pool {
   liquidity_usd?: number;
 }
 
+// Pool from the filter endpoint (/networks/{id}/pools/filter).
+// Unlike the list endpoint, the filter endpoint returns timeframe-split volume
+// (volume_usd_24h/_7d/_30d) and liquidity_usd, and no flat volume_usd.
+export interface FilteredPool {
+  id: string;
+  dex_id: string;
+  dex_name: string;
+  chain: string;
+  tokens: Token[];
+  created_at?: string;
+  created_at_block_number?: number;
+  transactions?: number;
+  price_usd?: number;
+  volume_usd_24h?: number;
+  volume_usd_7d?: number;
+  volume_usd_30d?: number;
+  liquidity_usd?: number;
+  last_price_change_usd_5m?: number | null;
+  last_price_change_usd_1h?: number | null;
+  last_price_change_usd_24h?: number | null;
+  fee?: number | null;
+}
+
 // alias for backward compat
 export type PoolsResponse = PoolPaginatedResponse;
 

@@ -1,6 +1,6 @@
 // We'll need to import these types to avoid reference errors
 import { Dex } from './dexes';
-import { Pool } from './pools';
+import { Pool, FilteredPool } from './pools';
 
 // page info for pagination
 export interface PageInfo {
@@ -31,6 +31,6 @@ export interface PoolPaginatedResponse {
 
 // pool filter response (uses 'results' key)
 export interface PoolFilterPaginatedResponse {
-  results: Pool[];
+  results: FilteredPool[];
   page_info: PageInfo;
 }

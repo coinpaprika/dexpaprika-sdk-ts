@@ -105,10 +105,13 @@ export class TokensAPI extends BaseAPI {
     if (options?.createdAfter !== undefined) params.created_after = options.createdAfter;
     if (options?.createdBefore !== undefined) params.created_before = options.createdBefore;
 
-    return this._get<TokenFilterPaginatedResponse>(
-      `/networks/${networkId}/tokens/filter`,
-      params
-    );
+    // The token filter endpoint returns its rows under a "data" key. Remap to
+    // "results" so the response matches the other filter endpoints' shape.
+    const raw = await this._get<{
+      data?: TokenFilterPaginatedResponse['results'];
+      page_info: TokenFilterPaginatedResponse['page_info'];
+    }>(`/networks/${networkId}/tokens/filter`, params);
+    return { results: raw.data ?? [], page_info: raw.page_info };
   }
 
   /**
