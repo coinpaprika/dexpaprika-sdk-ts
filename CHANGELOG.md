@@ -2,6 +2,12 @@
 
 All notable changes to the DexPaprika SDK will be documented in this file.
 
+## Unreleased
+
+### Added
+- **Advanced pool search**: `pools.advancedSearch()` (alias `pools.search()`) backed by the `/frontend/v1/pools` and `/frontend/v1/networks/{network}/pools` endpoints. Supports price and price-change filters, a `dexName` filter, an optional `detailed` token payload (fdv + per-timeframe metric blocks), and cursor pagination. The canonical `sortBy` / `sortDir` options are translated to the backend wire names `order_by` / `sort`.
+- New TypeScript interfaces: `AdvancedPoolSearchOptions`, `AdvancedPoolSearchSortBy`, `AdvancedPoolSearchResponse`, `PoolRow`, `AdvancedSearchToken`, `AdvancedSearchTokenMetrics`. Response and token fields are optional/nullable to match what the API may omit.
+
 ## 1.5.0 (2026-03-31)
 
 ### Added

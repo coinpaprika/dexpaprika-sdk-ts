@@ -239,6 +239,34 @@ const filtered = await client.pools.filter('ethereum', {
 console.log(`Found ${filtered.results.length} pools matching criteria`);
 ```
 
+### Advanced Pool Search
+
+```js
+// Richer search than filter(): price/price-change filters, dex filter,
+// optional detailed token payload (fdv + per-timeframe metrics), cursor paging.
+// Sort takes the canonical sortBy/sortDir (translated to order_by/sort on the wire).
+const res = await client.pools.advancedSearch({
+  limit: 20,
+  sortBy: 'volume_usd_24h',
+  sortDir: 'desc',
+  priceUsdMin: 0.5,
+  dexName: 'uniswap_v3',
+  detailed: true
+});
+console.log(`Found ${res.results.length} pools`);
+
+// Scope to one network:
+const eth = await client.pools.advancedSearch({ network: 'ethereum', limit: 10 });
+
+// Cursor pagination (this endpoint is NOT page-based):
+if (eth.has_next_page && eth.next_cursor) {
+  const page2 = await client.pools.advancedSearch({ network: 'ethereum', cursor: eth.next_cursor });
+}
+
+// search() is an alias for advancedSearch().
+const same = await client.pools.search({ limit: 5 });
+```
+
 ### Top Tokens & Token Filtering
 
 ```js

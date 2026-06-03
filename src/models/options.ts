@@ -106,6 +106,72 @@ export interface PoolFilterOptions {
 }
 
 /**
+ * Sort field for the advanced pool search endpoint.
+ * Exposed as the canonical `sortBy`; translated to the wire name `order_by`.
+ */
+export type AdvancedPoolSearchSortBy =
+  | 'volume_usd_24h'
+  | 'volume_usd_7d'
+  | 'volume_usd_30d'
+  | 'liquidity_usd'
+  | 'txns_24h'
+  | 'price_usd'
+  | 'price_change_percentage_24h'
+  | 'created_at';
+
+/**
+ * Options for the advanced pool search endpoint
+ * (`/frontend/v1/pools` and `/frontend/v1/networks/{network}/pools`).
+ *
+ * This endpoint is CURSOR-paginated (not page-based): pass `cursor` with the
+ * `next_cursor` from the previous response to fetch the next page.
+ *
+ * Note on sorting: this surface exposes the canonical `sortBy` / `sortDir`
+ * names, which are translated to the backend wire names `order_by` / `sort`.
+ * You never pass `order_by` / `sort` yourself.
+ */
+export interface AdvancedPoolSearchOptions {
+  /** Number of results per page. */
+  limit?: number;
+  /** Cursor for the next page (use `next_cursor` from the previous response). */
+  cursor?: string;
+  /** Field to sort by. Canonical name; translated to the wire `order_by`. Defaults to "volume_usd_24h". */
+  sortBy?: AdvancedPoolSearchSortBy | string;
+  /** Sort direction. Canonical name; translated to the wire `sort`. Defaults to "desc". */
+  sortDir?: 'asc' | 'desc';
+  /** When true, each token carries fdv plus per-timeframe metric blocks. */
+  detailed?: boolean;
+  /** Minimum 24h volume in USD. */
+  volume24hMin?: number;
+  /** Maximum 24h volume in USD. */
+  volume24hMax?: number;
+  /** Minimum 7d volume in USD. */
+  volume7dMin?: number;
+  /** Maximum 7d volume in USD. */
+  volume7dMax?: number;
+  /** Minimum liquidity in USD. */
+  liquidityUsdMin?: number;
+  /** Maximum liquidity in USD. */
+  liquidityUsdMax?: number;
+  /** Minimum 24h transaction count. */
+  txns24hMin?: number;
+  /** Minimum price in USD. */
+  priceUsdMin?: number;
+  /** Maximum price in USD. */
+  priceUsdMax?: number;
+  /** Minimum 24h price change percentage. */
+  priceChangePercentage24hMin?: number;
+  /** Maximum 24h price change percentage. */
+  priceChangePercentage24hMax?: number;
+  /** Filter by DEX name (e.g. "uniswap_v3"). */
+  dexName?: string;
+  /** Only pools created after this Unix timestamp or ISO date. */
+  createdAfter?: number | string;
+  /** Only pools created before this Unix timestamp or ISO date. */
+  createdBefore?: number | string;
+}
+
+/**
  * Options for top tokens endpoint
  */
 export interface TopTokensOptions {

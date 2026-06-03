@@ -3,13 +3,18 @@ import {
   PoolDetails,
   OHLCVRecord
 } from '../models/pools';
-import { PoolPaginatedResponse, PoolFilterPaginatedResponse } from '../models/base';
+import {
+  PoolPaginatedResponse,
+  PoolFilterPaginatedResponse,
+  AdvancedPoolSearchResponse,
+} from '../models/base';
 import {
   PoolListOptions,
   OHLCVOptions,
   PoolDetailsOptions,
   TransactionOptions,
   PoolFilterOptions,
+  AdvancedPoolSearchOptions,
 } from '../models/options';
 import { DeprecatedEndpointError } from '../utils/errors';
 
@@ -239,5 +244,100 @@ export class PoolsAPI extends BaseAPI {
     if (options?.createdBefore !== undefined) params.created_before = options.createdBefore;
 
     return this._get<PoolFilterPaginatedResponse>(`/networks/${networkId}/pools/filter`, params);
+  }
+
+  /**
+   * Advanced pool search backed by the /frontend/v1 endpoints.
+   *
+   * Hits `/frontend/v1/pools` globally, or
+   * `/frontend/v1/networks/{network}/pools` when a network is supplied. This is
+   * a richer search than `filter`: it supports price and price-change filters,
+   * a `dexName` filter, an optional `detailed` token payload (fdv + per-timeframe
+   * metric blocks), and CURSOR pagination.
+   *
+   * This endpoint is cursor-paginated, not page-based. Walk pages by passing the
+   * previous response's `next_cursor` back in as `cursor`, while `has_next_page`
+   * is true.
+   *
+   * Sorting note: the surface takes the canonical `sortBy` / `sortDir`, which are
+   * translated to the backend wire names `order_by` / `sort`. Do not pass the wire
+   * names yourself.
+   *
+   * @example
+   * ```typescript
+   * // Global search, top pools by 24h volume priced above $0.50 on Uniswap V3:
+   * const res = await client.pools.advancedSearch({
+   *   limit: 20,
+   *   sortBy: 'volume_usd_24h',
+   *   sortDir: 'desc',
+   *   priceUsdMin: 0.5,
+   *   dexName: 'uniswap_v3',
+   *   detailed: true,
+   * });
+   *
+   * // Per-network search (Ethereum):
+   * const ethRes = await client.pools.advancedSearch({ network: 'ethereum', limit: 10 });
+   *
+   * // Next page:
+   * if (ethRes.has_next_page && ethRes.next_cursor) {
+   *   const page2 = await client.pools.advancedSearch({ network: 'ethereum', cursor: ethRes.next_cursor });
+   * }
+   * ```
+   *
+   * @param options - Search criteria, sorting, detail flag, cursor, and an optional `network`.
+   * @returns Matching pool rows with cursor pagination info.
+   */
+  async advancedSearch(
+    options?: AdvancedPoolSearchOptions & { network?: string }
+  ): Promise<AdvancedPoolSearchResponse> {
+    // Translate the canonical sortBy/sortDir to the wire names order_by/sort.
+    // This is the inverse of intuition and the #1 trap for this endpoint.
+    const params: Record<string, any> = {
+      limit: options?.limit ?? 10,
+      order_by: options?.sortBy ?? 'volume_usd_24h',
+      sort: options?.sortDir ?? 'desc',
+    };
+
+    if (options?.cursor) params.cursor = options.cursor;
+    if (options?.detailed) params.detailed = 'true';
+
+    if (options?.volume24hMin !== undefined) params.volume_24h_min = options.volume24hMin;
+    if (options?.volume24hMax !== undefined) params.volume_24h_max = options.volume24hMax;
+    if (options?.volume7dMin !== undefined) params.volume_7d_min = options.volume7dMin;
+    if (options?.volume7dMax !== undefined) params.volume_7d_max = options.volume7dMax;
+    if (options?.liquidityUsdMin !== undefined) params.liquidity_usd_min = options.liquidityUsdMin;
+    if (options?.liquidityUsdMax !== undefined) params.liquidity_usd_max = options.liquidityUsdMax;
+    if (options?.txns24hMin !== undefined) params.txns_24h_min = options.txns24hMin;
+    if (options?.priceUsdMin !== undefined) params.price_usd_min = options.priceUsdMin;
+    if (options?.priceUsdMax !== undefined) params.price_usd_max = options.priceUsdMax;
+    if (options?.priceChangePercentage24hMin !== undefined) {
+      params.price_change_percentage_24h_min = options.priceChangePercentage24hMin;
+    }
+    if (options?.priceChangePercentage24hMax !== undefined) {
+      params.price_change_percentage_24h_max = options.priceChangePercentage24hMax;
+    }
+    if (options?.dexName !== undefined) params.dex_name = options.dexName;
+    if (options?.createdAfter !== undefined) params.created_after = options.createdAfter;
+    if (options?.createdBefore !== undefined) params.created_before = options.createdBefore;
+
+    const endpoint = options?.network
+      ? `/frontend/v1/networks/${options.network}/pools`
+      : '/frontend/v1/pools';
+
+    const raw = await this._get<AdvancedPoolSearchResponse>(endpoint, params);
+    // Never hand back an undefined results array (the API may drop the key).
+    return { ...raw, results: raw.results ?? [] };
+  }
+
+  /**
+   * Alias for {@link advancedSearch}.
+   *
+   * @param options - Search criteria, sorting, detail flag, cursor, and an optional `network`.
+   * @returns Matching pool rows with cursor pagination info.
+   */
+  search(
+    options?: AdvancedPoolSearchOptions & { network?: string }
+  ): Promise<AdvancedPoolSearchResponse> {
+    return this.advancedSearch(options);
   }
 }
