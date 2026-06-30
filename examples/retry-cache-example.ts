@@ -1,11 +1,6 @@
 // Retry and Cache Example
 import { DexPaprikaClient } from '../src';
 
-// Define a minimal type to avoid TypeScript errors
-interface PaginatedPoolResponse {
-  pools: { name?: string; length: number }[];
-}
-
 async function main() {
   try {
     // Create client with custom configuration
@@ -80,21 +75,21 @@ async function main() {
     
     // Get Ethereum pools (first request)
     console.time('Ethereum pools (first request)');
-    const ethPools = await client.pools.listByNetwork('ethereum', 0, 5) as PaginatedPoolResponse;
+    const ethPools = await client.pools.listByNetwork('ethereum', { limit: 5 });
     console.timeEnd('Ethereum pools (first request)');
-    console.log(`   - Found ${ethPools.pools.length} Ethereum pools`);
+    console.log(`   - Found ${ethPools.results.length} Ethereum pools`);
     console.log(`   - Cache size: ${client.cacheSize} entries`);
-    
+
     // Get Solana pools (different query, should hit API)
     console.time('Solana pools (different query)');
-    const solPools = await client.pools.listByNetwork('solana', 0, 5) as PaginatedPoolResponse;
+    const solPools = await client.pools.listByNetwork('solana', { limit: 5 });
     console.timeEnd('Solana pools (different query)');
-    console.log(`   - Found ${solPools.pools.length} Solana pools`);
+    console.log(`   - Found ${solPools.results.length} Solana pools`);
     console.log(`   - Cache size: ${client.cacheSize} entries`);
-    
+
     // Get Ethereum pools again (should use cache)
     console.time('Ethereum pools (cached)');
-    await client.pools.listByNetwork('ethereum', 0, 5);
+    await client.pools.listByNetwork('ethereum', { limit: 5 });
     console.timeEnd('Ethereum pools (cached)');
     
     console.log('\nExample completed successfully!');

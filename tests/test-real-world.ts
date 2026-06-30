@@ -51,19 +51,17 @@ async function realWorldTest() {
     // Get Ethereum pools (different endpoint)
     console.time('  Ethereum pools');
     const ethPools = await client.pools.listByNetwork('ethereum', {
-      page: 0,
       limit: 3
     });
     console.timeEnd('  Ethereum pools');
-    
-    if (ethPools.pools.length > 0) {
-      console.log(`  Top Ethereum pool: ${ethPools.pools[0].dex_name}`);
+
+    if (ethPools.results.length > 0) {
+      console.log(`  Top Ethereum pool: ${ethPools.results[0].dex_name}`);
     }
-    
+
     // Get the same pools again (should be cached)
     console.time('  Ethereum pools (cached)');
     await client.pools.listByNetwork('ethereum', {
-      page: 0,
       limit: 3
     });
     console.timeEnd('  Ethereum pools (cached)');

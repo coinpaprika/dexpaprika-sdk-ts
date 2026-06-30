@@ -20,6 +20,8 @@ export interface SortOptions extends PaginationOptions {
   sort?: 'asc' | 'desc';
   /** Field to sort by */
   orderBy?: string;
+  /** Cursor for the next page (cursor-paginated search endpoints) */
+  cursor?: string;
 }
 
 /**
@@ -77,11 +79,13 @@ export interface OHLCVOptions {
  * Options for pool filtering endpoint
  */
 export interface PoolFilterOptions {
-  /** Page number (1-indexed) */
+  /** @deprecated The search endpoint is cursor-paginated; `page` is ignored. Use `cursor`. */
   page?: number;
+  /** Cursor for the next page (from the response's `next_cursor`) */
+  cursor?: string;
   /** Number of results per page (max 100) */
   limit?: number;
-  /** Field to sort by */
+  /** Field to sort by (legacy values such as 'volume_24h' are mapped) */
   sortBy?: string;
   /** Sort direction */
   sortDir?: 'asc' | 'desc';
@@ -109,11 +113,13 @@ export interface PoolFilterOptions {
  * Options for top tokens endpoint
  */
 export interface TopTokensOptions {
-  /** Page number (1-indexed) */
+  /** @deprecated The search endpoint is cursor-paginated; `page` is ignored. Use `cursor`. */
   page?: number;
+  /** Cursor for the next page (from the response's `next_cursor`) */
+  cursor?: string;
   /** Number of results per page (max 100) */
   limit?: number;
-  /** Field to order by (e.g., "volume_24h", "price_usd", "liquidity_usd") */
+  /** Field to order by (legacy values such as "volume_24h" are mapped) */
   orderBy?: string;
   /** Sort direction */
   sort?: 'asc' | 'desc';
@@ -123,11 +129,13 @@ export interface TopTokensOptions {
  * Options for token filtering endpoint
  */
 export interface TokenFilterOptions {
-  /** Page number (1-indexed) */
+  /** @deprecated The search endpoint is cursor-paginated; `page` is ignored. Use `cursor`. */
   page?: number;
+  /** Cursor for the next page (from the response's `next_cursor`) */
+  cursor?: string;
   /** Number of results per page (max 100) */
   limit?: number;
-  /** Field to sort by */
+  /** Field to sort by (legacy values such as 'volume_24h' are mapped) */
   sortBy?: string;
   /** Sort direction */
   sortDir?: 'asc' | 'desc';
