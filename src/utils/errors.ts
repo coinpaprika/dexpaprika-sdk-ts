@@ -78,7 +78,12 @@ export class DeprecatedEndpointError extends DexPaprikaError {
 
     // Surface the API's own deprecation message first, when it sent one.
     if (apiMessage) {
-      const trimmed = apiMessage.trim().replace(/[.:;\s]+$/, '');
+      // Strip trailing sentence punctuation and whitespace without a
+      // backtracking regex (ReDoS-safe) and without trimEnd (ES2019+).
+      let trimmed = apiMessage.trim();
+      while (trimmed.length > 0 && '.:; \t\n\r\f\v'.indexOf(trimmed[trimmed.length - 1]) !== -1) {
+        trimmed = trimmed.slice(0, -1);
+      }
       if (trimmed) {
         parts.push(`${trimmed}.`);
       }
