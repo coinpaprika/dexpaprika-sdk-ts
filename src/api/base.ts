@@ -39,19 +39,49 @@ export class BaseAPI {
       // Handle HTTP errors
       if (error.response) {
         const status = error.response.status;
-        const message = error.response.data?.error || error.response.data?.message || 'Unknown API error';
-        
-        // Handle deprecated endpoint (410 Gone)
+        const data = error.response.data;
+
+        // Parse the error body defensively: it may not be JSON, or may lack
+        // these fields. Anything unexpected falls back to prior behavior.
+        const bodyIsObject = data !== null && typeof data === 'object';
+        const replacement: string | undefined =
+          bodyIsObject && typeof data.replacement === 'string' && data.replacement.trim() !== ''
+            ? data.replacement
+            : undefined;
+        const apiMessage: string | undefined = bodyIsObject
+          ? (data.error || data.message)
+          : undefined;
+        const message = apiMessage || 'Unknown API error';
+
+        // Generic, self-documenting deprecation handling: ANY non-2xx whose
+        // body carries a "replacement" hint is surfaced as a
+        // DeprecatedEndpointError that includes both the API's message and the
+        // exact replacement path. Not limited to 410 or specific endpoints, so
+        // future deprecations document themselves without an SDK change.
+        if (replacement) {
+          if (endpoint === '/pools') {
+            // Keep the /pools client-side special case wording, but still
+            // attach the API's message and replacement path for callers.
+            throw new DeprecatedEndpointError(
+              '/pools',
+              'network-specific endpoints like client.pools.listByNetwork(\'ethereum\')',
+              { replacement, apiMessage }
+            );
+          }
+          throw new DeprecatedEndpointError(endpoint, replacement, { replacement, apiMessage });
+        }
+
+        // Handle deprecated endpoint (410 Gone) with no replacement in body.
         if (status === 410) {
           if (endpoint === '/pools') {
             throw new DeprecatedEndpointError(
-              '/pools', 
+              '/pools',
               'network-specific endpoints like client.pools.listByNetwork(\'ethereum\')'
             );
           }
           throw new DeprecatedEndpointError(endpoint, 'check API documentation for alternatives');
         }
-        
+
         // Handle not found errors with context
         if (status === 404) {
           if (message.toLowerCase().includes('network')) {
