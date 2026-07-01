@@ -46,15 +46,65 @@ export class ApiError extends DexPaprikaError {
 }
 
 /**
- * Error thrown when trying to use a deprecated endpoint
+ * Optional deprecation hints surfaced by the API response body.
+ */
+export interface DeprecationDetails {
+  /** Replacement path advertised by the API (e.g. "/networks/:network/pools/search"). */
+  replacement?: string;
+  /** Raw deprecation message from the API response body (e.g. "endpoint removed"). */
+  apiMessage?: string;
+}
+
+/**
+ * Error thrown when trying to use a deprecated endpoint.
+ *
+ * When the API response body carries a "replacement" hint, it is surfaced on
+ * the {@link DeprecatedEndpointError.replacement} field and folded into the
+ * error message, so future deprecations self-document without an SDK change.
  */
 export class DeprecatedEndpointError extends DexPaprikaError {
-  constructor(endpoint: string, alternative: string) {
-    super(
-      `The ${endpoint} endpoint has been deprecated and removed. ` +
-      `Please use ${alternative} instead. ` +
-      `For more information, visit: https://docs.dexpaprika.com/changelog/changelog`
-    );
+  /** The deprecated endpoint that was called. */
+  public readonly endpoint: string;
+  /** Human-facing suggestion for what to use instead. */
+  public readonly alternative: string;
+  /** Replacement path advertised by the API response body, when present. */
+  public readonly replacement?: string;
+  /** Raw deprecation message from the API response body, when present. */
+  public readonly apiMessage?: string;
+
+  constructor(endpoint: string, alternative: string, details: DeprecationDetails = {}) {
+    const { replacement, apiMessage } = details;
+    const parts: string[] = [];
+
+    // Surface the API's own deprecation message first, when it sent one.
+    if (apiMessage) {
+      // Strip trailing sentence punctuation and whitespace without a
+      // backtracking regex (ReDoS-safe) and without trimEnd (ES2019+).
+      let trimmed = apiMessage.trim();
+      while (trimmed.length > 0 && '.:; \t\n\r\f\v'.indexOf(trimmed[trimmed.length - 1]) !== -1) {
+        trimmed = trimmed.slice(0, -1);
+      }
+      if (trimmed) {
+        parts.push(`${trimmed}.`);
+      }
+    }
+
+    parts.push(`The ${endpoint} endpoint has been deprecated and removed.`);
+    parts.push(`Please use ${alternative} instead.`);
+
+    // Point at the exact path the API advertised, if it differs from the
+    // human-facing suggestion above (avoids repeating it verbatim).
+    if (replacement && replacement !== alternative) {
+      parts.push(`API replacement: ${replacement}.`);
+    }
+
+    parts.push('For more information, visit: https://docs.dexpaprika.com/changelog/changelog');
+
+    super(parts.join(' '));
     this.name = 'DeprecatedEndpointError';
+    this.endpoint = endpoint;
+    this.alternative = alternative;
+    this.replacement = replacement;
+    this.apiMessage = apiMessage;
   }
 } 

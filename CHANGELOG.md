@@ -2,6 +2,11 @@
 
 All notable changes to the DexPaprika SDK will be documented in this file.
 
+## 1.6.1 (2026-07-01)
+
+### Changed
+- **`DeprecatedEndpointError` now surfaces the API replacement**: on an error whose body carries a `replacement` field, the thrown error includes the API's own message and points at the real replacement path (not just the hardcoded `/pools` alternative), and exposes `.replacement` / `.apiMessage` accessors. Generic across any error status carrying a `replacement`.
+
 ## 1.6.0 (2026-06-30)
 
 ### Breaking Changes
