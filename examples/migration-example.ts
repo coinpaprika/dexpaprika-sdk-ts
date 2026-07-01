@@ -26,19 +26,18 @@ async function main() {
   console.log('2. Using the new network-specific approach:');
   try {
     const ethereumPools = await client.pools.listByNetwork('ethereum', {
-      page: 0,
       limit: 3,
       sort: 'desc',
-      orderBy: 'volume_usd'
+      orderBy: 'volume_usd_24h'
     });
-    console.log(`✅ Successfully fetched ${ethereumPools.pools.length} Ethereum pools`);
-    
+    console.log(`✅ Successfully fetched ${ethereumPools.results.length} Ethereum pools`);
+
     // Show multiple networks
     const solanaPools = await client.pools.listByNetwork('solana', { limit: 2 });
-    console.log(`✅ Successfully fetched ${solanaPools.pools.length} Solana pools`);
-    
+    console.log(`✅ Successfully fetched ${solanaPools.results.length} Solana pools`);
+
     const fantomPools = await client.pools.listByNetwork('fantom', { limit: 2 });
-    console.log(`✅ Successfully fetched ${fantomPools.pools.length} Fantom pools\n`);
+    console.log(`✅ Successfully fetched ${fantomPools.results.length} Fantom pools\n`);
   } catch (error) {
     console.error('Unexpected error:', error);
   }

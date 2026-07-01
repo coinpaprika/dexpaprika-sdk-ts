@@ -13,9 +13,23 @@ Developed and maintained by [Coinpaprika](https://coinpaprika.com).
 npm install dexpaprika-sdk
 ```
 
-## Important: API v1.3.0 Migration Notice
+## Important: migration notices
 
-**⚠️ Breaking Changes in v1.4.0**: The global pools endpoint has been deprecated. All pool queries now require a network specification.
+**Breaking changes in v1.6.0**: The API removed the per-network list/filter REST endpoints (now HTTP 410). `pools.listByNetwork()`, `pools.filter()`, `tokens.getTop()`, and `tokens.filter()` now call the unified search endpoints and return the cursor-paginated shape `{ results, has_next_page, next_cursor }`. Method signatures are unchanged; legacy sort/filter values are mapped internally. See the [CHANGELOG](./CHANGELOG.md) for field-level details.
+
+```javascript
+// Cursor pagination (page is ignored on search endpoints):
+const first = await client.pools.listByNetwork('ethereum', { limit: 10 });
+console.log(first.results, first.has_next_page);
+if (first.next_cursor) {
+  const next = await client.pools.listByNetwork('ethereum', {
+    limit: 10,
+    cursor: first.next_cursor
+  });
+}
+```
+
+**Breaking changes in v1.4.0**: The global pools endpoint has been deprecated. All pool queries now require a network specification.
 
 ```javascript
 // ❌ OLD (deprecated) - will throw DeprecatedEndpointError:
@@ -38,12 +52,12 @@ const client = new DexPaprikaClient();
 const networks = await client.networks.list();
 console.log(networks);
 
-// Get top pools on Ethereum
+// Get top pools on Ethereum (cursor-paginated search endpoint)
 const pools = await client.pools.listByNetwork('ethereum', {
-  page: 0,
   limit: 10
 });
-console.log(pools.pools);
+console.log(pools.results);            // pool rows
+console.log(pools.has_next_page, pools.next_cursor); // pagination
 
 // Search for tokens
 const results = await client.search.search('bitcoin');
@@ -59,12 +73,11 @@ import { DexPaprikaClient } from 'dexpaprika-sdk';
 
 const client = new DexPaprikaClient();
 
-// Get top pools with pagination and sorting
+// Get top pools with sorting and cursor pagination
 const pools = await client.pools.listByNetwork('ethereum', {
-  page: 0,
   limit: 10,
   sort: 'desc',
-  orderBy: 'volume_usd'
+  orderBy: 'volume_usd_24h' // legacy 'volume_usd' is also accepted and mapped
 });
 
 // Get pool details with options
@@ -156,13 +169,22 @@ const dexes = await client.dexes.listByNetwork('ethereum', {
 ### Pools & Transactions
 
 ```js
-// Top pools on Ethereum with pagination
+// Top pools on Ethereum (cursor-paginated; read results / has_next_page / next_cursor)
 const topPools = await client.pools.listByNetwork('ethereum', {
-  page: 0,
   limit: 10,
   sort: 'desc',
-  orderBy: 'volume_usd'
+  orderBy: 'volume_usd_24h'
 });
+console.log(`Got ${topPools.results.length} pools`);
+
+// Fetch the next page with the returned cursor
+if (topPools.has_next_page && topPools.next_cursor) {
+  const nextPage = await client.pools.listByNetwork('ethereum', {
+    limit: 10,
+    cursor: topPools.next_cursor
+  });
+  console.log(`Next page: ${nextPage.results.length} pools`);
+}
 
 // Top pools on different networks
 const solanaPools = await client.pools.listByNetwork('solana', { limit: 5 });
@@ -227,26 +249,36 @@ const pools = await client.tokens.getPools(
 
 ### Pool Filtering
 
+Backed by the unified `/networks/{network}/pools/search` endpoint. Results come
+back as `{ results, has_next_page, next_cursor }`; legacy `sortBy` values such as
+`volume_24h` are accepted and mapped to canonical fields.
+
 ```js
 // Find high-volume pools on Ethereum
 const filtered = await client.pools.filter('ethereum', {
   volume24hMin: 100000,
   txns24hMin: 50,
-  sortBy: 'volume_24h',
+  sortBy: 'volume_usd_24h', // legacy 'volume_24h' also accepted
   sortDir: 'desc',
   limit: 10
 });
 console.log(`Found ${filtered.results.length} pools matching criteria`);
+// Next page: pass filtered.next_cursor as `cursor`
 ```
 
 ### Top Tokens & Token Filtering
 
+Both are backed by `/networks/{network}/tokens/search` and return
+`{ results, has_next_page, next_cursor }`. Token rows are flat: `address`,
+`volume_usd_24h`, `fdv_usd`, `txns_24h`, `price_change_percentage_24h`, etc.
+
 ```js
-// Get top tokens by volume
+// Get top tokens by 24h volume
 const topTokens = await client.tokens.getTop('ethereum', {
-  orderBy: 'volume_24h',
+  orderBy: 'volume_usd_24h', // legacy 'volume_24h' also accepted
   limit: 10
 });
+console.log(topTokens.results.map(t => t.address));
 
 // Filter tokens by criteria
 const filtered = await client.tokens.filter('ethereum', {

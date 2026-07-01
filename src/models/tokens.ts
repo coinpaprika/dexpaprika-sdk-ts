@@ -152,42 +152,13 @@ export interface TokenTimeInterval {
   txns: number;
 }
 
-// Time interval metrics for top tokens (lighter version)
-export interface TopTokenTimeMetrics {
-  volume_usd: number;
-  txns: number;
-  last_price_usd_change?: number;
-  buys?: number;
-  sells?: number;
-}
-
-// Token from the top tokens endpoint
-export interface TopToken {
+// Token item from the unified search endpoint (/networks/{id}/tokens/search).
+// Flat shape: no name/symbol, no buys/sells, no pools-count, no nested
+// 24h/1h/5m objects.
+export interface SearchToken {
   address: string;
-  name: string;
-  symbol: string;
   chain: string;
-  decimals: number;
-  has_image?: boolean;
-  price_usd?: number;
-  fdv?: number;
-  liquidity_usd?: number;
-  pools?: number;
-  '24h'?: TopTokenTimeMetrics;
-  '1h'?: TopTokenTimeMetrics;
-  '5m'?: TopTokenTimeMetrics;
-}
-
-// Paginated response for top tokens
-export interface TopTokensPaginatedResponse {
-  tokens: TopToken[];
-  page_info: import('./base').PageInfo;
-}
-
-// Token from the filter endpoint
-export interface FilteredToken {
-  chain: string;
-  address: string;
+  created_at?: string;
   price_usd?: number;
   volume_usd_24h?: number;
   volume_usd_7d?: number;
@@ -195,14 +166,22 @@ export interface FilteredToken {
   liquidity_usd?: number;
   fdv_usd?: number;
   txns_24h?: number;
-  created_at?: string;
+  price_change_percentage_24h?: number;
 }
 
-// Paginated response for filtered tokens
-export interface TokenFilterPaginatedResponse {
-  results: FilteredToken[];
-  page_info: import('./base').PageInfo;
+// Back-compat alias for the previous tokens/filter item type.
+export type FilteredToken = SearchToken;
+
+// Response from the cursor-paginated /networks/{network}/tokens/search endpoint.
+// Used by both tokens.getTop() and tokens.filter().
+export interface TokenSearchResponse {
+  results: SearchToken[];
+  has_next_page?: boolean;
+  next_cursor?: string | null;
 }
+
+// Back-compat alias for the previous token filter response type.
+export type TokenFilterPaginatedResponse = TokenSearchResponse;
 
 // Token price from multi-prices endpoint
 export interface TokenPrice {

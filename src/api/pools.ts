@@ -3,7 +3,7 @@ import {
   PoolDetails,
   OHLCVRecord
 } from '../models/pools';
-import { PoolPaginatedResponse, PoolFilterPaginatedResponse } from '../models/base';
+import { PoolPaginatedResponse, PoolSearchResponse } from '../models/base';
 import {
   PoolListOptions,
   OHLCVOptions,
@@ -12,6 +12,7 @@ import {
   PoolFilterOptions,
 } from '../models/options';
 import { DeprecatedEndpointError } from '../utils/errors';
+import { mapPoolSortField, mapPoolFilterParams } from '../utils/searchParams';
 
 // Pools API implementation
 export class PoolsAPI extends BaseAPI {
@@ -46,28 +47,33 @@ export class PoolsAPI extends BaseAPI {
   }
   
   /**
-   * Get pools on a specific network with pagination and sorting.
-   * 
+   * Get pools on a specific network, cursor-paginated and sorted.
+   *
+   * Backed by the unified /networks/{network}/pools/search endpoint. Legacy
+   * `orderBy` values (e.g. 'volume_usd') are accepted and mapped to canonical
+   * sort fields; pass `cursor` for the next page (the response carries
+   * `has_next_page` and `next_cursor`).
+   *
    * @param networkId - Network identifier (e.g., 'ethereum', 'solana')
-   * @param options - Options for filtering, pagination and sorting
-   * @returns Paginated list of pools on the specified network
+   * @param options - Options for sorting, limit and cursor pagination
+   * @returns Search response with pool results on the specified network
    */
   async listByNetwork(
-    networkId: string, 
+    networkId: string,
     options?: PoolListOptions
-  ): Promise<PoolPaginatedResponse> {
+  ): Promise<PoolSearchResponse> {
     if (!networkId) {
       throw new Error('Network ID is required. Use \'ethereum\', \'solana\', \'fantom\', etc.');
     }
-    
+
     const params: Record<string, any> = {
-      page: options?.page ?? 0,
       limit: options?.limit ?? 10,
       sort: options?.sort ?? 'desc',
-      order_by: options?.orderBy ?? 'volume_usd'
+      order_by: mapPoolSortField(options?.orderBy),
     };
-    
-    return this._get<PoolPaginatedResponse>(`/networks/${networkId}/pools`, params);
+    if (options?.cursor) params.cursor = options.cursor;
+
+    return this._get<PoolSearchResponse>(`/networks/${networkId}/pools/search`, params);
   }
   
   /**
@@ -209,35 +215,42 @@ export class PoolsAPI extends BaseAPI {
   /**
    * Filter pools on a network by volume, liquidity, transactions, and creation date.
    *
+   * Backed by the unified /networks/{network}/pools/search endpoint. The request
+   * sends `order_by` (mapped from the legacy `sortBy`) and `sort` (direction),
+   * and is cursor-paginated (pass `cursor`; read `has_next_page`/`next_cursor`
+   * from the response). Legacy filter param names are mapped to canonical ones.
+   *
    * @param networkId - Network identifier (e.g., 'ethereum', 'solana')
-   * @param options - Filter criteria and pagination options
-   * @returns Filtered pools with pagination info
+   * @param options - Filter criteria and cursor pagination options
+   * @returns Search response with filtered pool results
    */
   async filter(
     networkId: string,
     options?: PoolFilterOptions
-  ): Promise<PoolFilterPaginatedResponse> {
+  ): Promise<PoolSearchResponse> {
     if (!networkId) {
       throw new Error('Network ID is required');
     }
 
     const params: Record<string, any> = {
-      page: options?.page ?? 1,
       limit: options?.limit ?? 10,
-      sort_by: options?.sortBy ?? 'volume_24h',
-      sort_dir: options?.sortDir ?? 'desc',
+      order_by: mapPoolSortField(options?.sortBy),
+      sort: options?.sortDir ?? 'desc',
     };
+    if (options?.cursor) params.cursor = options.cursor;
 
-    if (options?.volume24hMin !== undefined) params.volume_24h_min = options.volume24hMin;
-    if (options?.volume24hMax !== undefined) params.volume_24h_max = options.volume24hMax;
-    if (options?.volume7dMin !== undefined) params.volume_7d_min = options.volume7dMin;
-    if (options?.volume7dMax !== undefined) params.volume_7d_max = options.volume7dMax;
-    if (options?.liquidityUsdMin !== undefined) params.liquidity_usd_min = options.liquidityUsdMin;
-    if (options?.liquidityUsdMax !== undefined) params.liquidity_usd_max = options.liquidityUsdMax;
-    if (options?.txns24hMin !== undefined) params.txns_24h_min = options.txns24hMin;
-    if (options?.createdAfter !== undefined) params.created_after = options.createdAfter;
-    if (options?.createdBefore !== undefined) params.created_before = options.createdBefore;
+    const filters: Record<string, any> = {};
+    if (options?.volume24hMin !== undefined) filters.volume_24h_min = options.volume24hMin;
+    if (options?.volume24hMax !== undefined) filters.volume_24h_max = options.volume24hMax;
+    if (options?.volume7dMin !== undefined) filters.volume_7d_min = options.volume7dMin;
+    if (options?.volume7dMax !== undefined) filters.volume_7d_max = options.volume7dMax;
+    if (options?.liquidityUsdMin !== undefined) filters.liquidity_usd_min = options.liquidityUsdMin;
+    if (options?.liquidityUsdMax !== undefined) filters.liquidity_usd_max = options.liquidityUsdMax;
+    if (options?.txns24hMin !== undefined) filters.txns_24h_min = options.txns24hMin;
+    if (options?.createdAfter !== undefined) filters.created_after = options.createdAfter;
+    if (options?.createdBefore !== undefined) filters.created_before = options.createdBefore;
+    Object.assign(params, mapPoolFilterParams(filters));
 
-    return this._get<PoolFilterPaginatedResponse>(`/networks/${networkId}/pools/filter`, params);
+    return this._get<PoolSearchResponse>(`/networks/${networkId}/pools/search`, params);
   }
 }

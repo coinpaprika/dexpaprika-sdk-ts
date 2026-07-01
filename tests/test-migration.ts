@@ -2,6 +2,7 @@
  * Test migration from deprecated pools.list() to network-specific methods
  */
 
+/// <reference types="node" />
 import { DexPaprikaClient, DeprecatedEndpointError } from '../src';
 
 async function testMigration() {
@@ -27,7 +28,7 @@ async function testMigration() {
     // Test 2: Verify network-specific method works
     console.log('\n2. Testing network-specific pools.listByNetwork() method...');
     const ethereumPools = await client.pools.listByNetwork('ethereum', { limit: 5 });
-    console.log(`✅ Successfully fetched ${ethereumPools.pools.length} Ethereum pools`);
+    console.log(`✅ Successfully fetched ${ethereumPools.results.length} Ethereum pools`);
     
     // Test 3: Test multiple networks
     console.log('\n3. Testing multiple networks...');
@@ -36,7 +37,7 @@ async function testMigration() {
     for (const network of networks) {
       try {
         const pools = await client.pools.listByNetwork(network, { limit: 3 });
-        console.log(`✅ ${network}: ${pools.pools.length} pools`);
+        console.log(`✅ ${network}: ${pools.results.length} pools`);
       } catch (error: any) {
         console.log(`⚠️  ${network}: ${error.message}`);
       }

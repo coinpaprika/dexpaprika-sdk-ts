@@ -1,8 +1,9 @@
+/// <reference types="node" />
 import { DexPaprikaClient } from '../src';
 
 // Test all 4 new endpoints against the live API
 async function main() {
-  console.log("Testing new DexPaprika SDK endpoints (v1.5.0)\n");
+  console.log("Testing new DexPaprika SDK endpoints (v1.6.0)\n");
   const client = new DexPaprikaClient();
   let passed = 0;
   let failed = 0;
@@ -25,11 +26,11 @@ async function main() {
       limit: 5,
     });
     if (!result.results || result.results.length === 0) throw new Error('No results');
-    if (!result.page_info) throw new Error('No page_info');
+    if (typeof result.has_next_page !== 'boolean') throw new Error('No has_next_page');
     const pool = result.results[0];
     if (!pool.id) throw new Error('Pool missing id');
     if (!pool.tokens || pool.tokens.length === 0) throw new Error('Pool missing tokens');
-    console.log(`   Got ${result.results.length} filtered pools, first: ${pool.tokens.map(t => t.symbol).join('/')}`);
+    console.log(`   Got ${result.results.length} filtered pools, first: ${pool.tokens.map(t => t.symbol ?? t.id.slice(0, 6)).join('/')}`);
   });
 
   await test('pools.filter - multiple params', async () => {
@@ -47,12 +48,12 @@ async function main() {
   // 2. Top Tokens
   await test('tokens.getTop - basic', async () => {
     const result = await client.tokens.getTop('ethereum', { limit: 5 });
-    if (!result.tokens || result.tokens.length === 0) throw new Error('No tokens');
-    if (!result.page_info) throw new Error('No page_info');
-    const token = result.tokens[0];
+    if (!result.results || result.results.length === 0) throw new Error('No tokens');
+    if (typeof result.has_next_page !== 'boolean') throw new Error('No has_next_page');
+    const token = result.results[0];
     if (!token.address) throw new Error('Token missing address');
-    if (!token.symbol) throw new Error('Token missing symbol');
-    console.log(`   Top token: ${token.symbol} at $${token.price_usd?.toFixed(4)}`);
+    if (!token.chain) throw new Error('Token missing chain');
+    console.log(`   Top token: ${token.address.substring(0, 10)}... at $${token.price_usd?.toFixed(4)}`);
   });
 
   await test('tokens.getTop - with sort', async () => {
@@ -61,8 +62,8 @@ async function main() {
       sort: 'asc',
       limit: 3,
     });
-    if (!result.tokens) throw new Error('No tokens');
-    console.log(`   Got ${result.tokens.length} tokens (asc sort)`);
+    if (!result.results) throw new Error('No tokens');
+    console.log(`   Got ${result.results.length} tokens (asc sort)`);
   });
 
   // 3. Token Filter
@@ -72,7 +73,7 @@ async function main() {
       limit: 5,
     });
     if (!result.results || result.results.length === 0) throw new Error('No results');
-    if (!result.page_info) throw new Error('No page_info');
+    if (typeof result.has_next_page !== 'boolean') throw new Error('No has_next_page');
     const token = result.results[0];
     if (!token.address) throw new Error('Token missing address');
     if (!token.chain) throw new Error('Token missing chain');
@@ -127,7 +128,7 @@ async function main() {
 
   await test('existing: pools.listByNetwork', async () => {
     const pools = await client.pools.listByNetwork('ethereum', { limit: 2 });
-    if (pools.pools.length === 0) throw new Error('No pools');
+    if (pools.results.length === 0) throw new Error('No pools');
   });
 
   await test('existing: tokens.getDetails', async () => {

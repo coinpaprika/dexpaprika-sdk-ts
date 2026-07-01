@@ -38,28 +38,43 @@ export interface Pool {
   liquidity_usd?: number;
 }
 
-// Pool from the filter endpoint (/networks/{id}/pools/filter).
-// Unlike the list endpoint, the filter endpoint returns timeframe-split volume
-// (volume_usd_24h/_7d/_30d) and liquidity_usd, and no flat volume_usd.
-export interface FilteredPool {
+// Token reference embedded in a pools/search result. By default the endpoint
+// returns only id/chain/has_image; name, symbol and decimals are populated when
+// the pool is fetched with detailed token info.
+export interface PoolTokenRef {
   id: string;
+  chain?: string;
+  has_image?: boolean;
+  name?: string;
+  symbol?: string;
+  decimals?: number;
+}
+
+// Pool item from the unified search endpoint (/networks/{id}/pools/search).
+// Volume is timeframe-split (volume_usd_24h/_7d/_30d), price changes are
+// percentages, and the transaction count is transactions_24h.
+export interface SearchPool {
+  id: string; // pool address
+  chain: string;
   dex_id: string;
   dex_name: string;
-  chain: string;
-  tokens: Token[];
-  created_at?: string;
-  created_at_block_number?: number;
-  transactions?: number;
-  price_usd?: number;
+  fee?: number | null;
+  created_at: string;
+  created_at_block_number: number;
   volume_usd_24h?: number;
   volume_usd_7d?: number;
   volume_usd_30d?: number;
   liquidity_usd?: number;
-  last_price_change_usd_5m?: number | null;
-  last_price_change_usd_1h?: number | null;
-  last_price_change_usd_24h?: number | null;
-  fee?: number | null;
+  transactions_24h?: number;
+  price_usd?: number;
+  price_change_percentage_5m?: number | null;
+  price_change_percentage_1h?: number | null;
+  price_change_percentage_24h?: number | null;
+  tokens: PoolTokenRef[];
 }
+
+// Back-compat alias for the previous pools/filter item type.
+export type FilteredPool = SearchPool;
 
 // alias for backward compat
 export type PoolsResponse = PoolPaginatedResponse;

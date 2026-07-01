@@ -2,6 +2,24 @@
 
 All notable changes to the DexPaprika SDK will be documented in this file.
 
+## 1.6.0 (2026-06-30)
+
+### Breaking Changes
+- The DexPaprika API removed four REST endpoints (now HTTP 410): `/networks/{network}/pools`, `/networks/{network}/pools/filter`, `/networks/{network}/tokens/top`, and `/networks/{network}/tokens/filter`.
+- `pools.listByNetwork()`, `pools.filter()`, `tokens.getTop()`, and `tokens.filter()` now call the unified search endpoints `/networks/{network}/pools/search` and `/networks/{network}/tokens/search`.
+- These four methods now return the cursor-paginated search shape: `{ results, has_next_page, next_cursor }` instead of `{ pools | tokens, page_info }`. Read the next page from `next_cursor` and pass it back via the new `cursor` option (`page` is ignored).
+- Item field changes: pool results expose `volume_usd_24h`/`volume_usd_7d`/`volume_usd_30d`, `liquidity_usd`, `transactions_24h`, and `price_change_percentage_5m`/`1h`/`24h` (the flat `volume_usd`, `transactions`, and `last_price_change_usd_*` fields are gone). Pool `tokens` are lean refs (`id`, `chain`, `has_image`) by default; `name`/`symbol`/`decimals` are typed as optional. Token results are flat (`address`, `volume_usd_24h`, `fdv_usd`, `txns_24h`, `price_change_percentage_24h`, ...) with no `name`/`symbol`/nested timeframe objects.
+
+### Changed
+- Public method signatures and option types are unchanged for back-compat: legacy `orderBy`/`sortBy` values (e.g. `volume_usd`, `volume_24h`, `txns`, `fdv`, `price_change`) and legacy filter param names are mapped to canonical search fields/params internally.
+- Added `cursor` to `PoolListOptions`, `PoolFilterOptions`, `TopTokensOptions`, and `TokenFilterOptions`.
+
+### Removed
+- Dead types from the old top-tokens response: `TopToken`, `TopTokenTimeMetrics`, `TopTokensPaginatedResponse`.
+
+### Added
+- New TypeScript interfaces: `SearchPool`, `PoolTokenRef`, `PoolSearchResponse`, `SearchToken`, `TokenSearchResponse`. `FilteredPool`/`FilteredToken` and `PoolFilterPaginatedResponse`/`TokenFilterPaginatedResponse` are retained as back-compat aliases.
+
 ## 1.5.0 (2026-03-31)
 
 ### Added

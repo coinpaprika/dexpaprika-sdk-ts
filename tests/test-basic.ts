@@ -23,16 +23,15 @@ async function main() {
     });
     console.log(`Got ${dexes.dexes.length} ETH dexes`);
     
-    // Get some top pools on Ethereum (updated to use network-specific method)
+    // Get some top pools on Ethereum (cursor-paginated pools/search endpoint)
     const pools = await client.pools.listByNetwork('ethereum', {
-      page: 0,
       limit: 3
     });
-    console.log(`Got ${pools.pools.length} top pools on Ethereum`);
-    
-    if (pools.pools.length > 0) {
+    console.log(`Got ${pools.results.length} top pools on Ethereum`);
+
+    if (pools.results.length > 0) {
       // Check first pool details
-      const pool = pools.pools[0];
+      const pool = pools.results[0];
       console.log(`Testing pool: ${pool.id} on ${pool.chain}`);
       
       // Pool details

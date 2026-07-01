@@ -18,25 +18,25 @@ async function main() {
     const stats = await client.utils.getStats();
     console.log(`Stats: ${stats.chains} chains, ${stats.pools} pools, ${stats.tokens} tokens`);
 
-    // Get top pools on Ethereum by volume (updated to use network-specific method)
+    // Get top pools on Ethereum by 24h volume (cursor-paginated pools/search)
     const poolsResp = await client.pools.listByNetwork('ethereum', {
-      page: 0,
       limit: 5,
       sort: 'desc',
-      orderBy: 'volume_usd'
+      orderBy: 'volume_usd_24h'
     });
     console.log('Top Ethereum pools:');
-    
-    // Display pool information with formatting
-    for (const pool of poolsResp.pools) {
-      const pair = pool.tokens.length < 2 ? 'Unknown' : 
-        formatPair(pool.tokens[0].symbol, pool.tokens[1].symbol);
-      console.log(`${pair}: ${formatVolume(pool.volume_usd)} on ${pool.dex_name}`);
+
+    // Display pool information with formatting. The pools/search endpoint returns
+    // lean token refs by default, so fall back to a short id when no symbol.
+    for (const pool of poolsResp.results) {
+      const label = (i: number) => pool.tokens[i].symbol ?? pool.tokens[i].id.slice(0, 6);
+      const pair = pool.tokens.length < 2 ? 'Unknown' : formatPair(label(0), label(1));
+      console.log(`${pair}: ${formatVolume(pool.volume_usd_24h ?? 0)} on ${pool.dex_name}`);
     }
 
     // Historical data for selected pool
-    if (poolsResp.pools.length) {
-      const pool = poolsResp.pools[0];
+    if (poolsResp.results.length) {
+      const pool = poolsResp.results[0];
       
       // Get data for the past week
       const weekAgo = new Date(lastWeek() * 1000).toISOString().split('T')[0];
