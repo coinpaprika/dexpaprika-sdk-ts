@@ -8,7 +8,7 @@ All notable changes to the DexPaprika SDK will be documented in this file.
 - The DexPaprika API removed `GET /networks/{network}/tokens/{address}/pools` (now HTTP 410). `tokens.getPools()` now calls the unified `/networks/{network}/pools/search` endpoint with its new `token_address` parameter.
 - `tokens.getPools()` returns the cursor-paginated search shape `{ results, has_next_page, next_cursor }` instead of `{ pools, page_info }`. Read the next page from `next_cursor` and pass it back via `cursor` (`page` is ignored).
 - The token filter is network-scoped only: the cross-network `/pools/search` endpoint accepts `token_address` but silently ignores it, so a network is always required.
-- `TokenPoolsOptions.pairWith` is deprecated and ignored: `/pools/search` has no pair filter, and repeating `token_address` is last-wins on the API side, not a pair filter. Filter the returned pools client-side by their `tokens` field to match a pair.
+- `TokenPoolsOptions.pairWith` is deprecated and ignored: `/pools/search` has no pair filter. Repeating `token_address` does not act as a pair filter; the API uses only one of the values (not guaranteed by order). Filter the returned pools client-side by their `tokens` field to match a pair.
 - The old `reorder` pair-perspective flip has no equivalent on `/pools/search`; metrics come from the pool's own perspective.
 - An unknown token address returns HTTP 200 with an empty result set, not an error. Legacy `orderBy` values (e.g. `volume_usd`) are mapped to canonical sort fields internally.
 

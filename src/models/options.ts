@@ -38,7 +38,8 @@ export interface TokenPoolsOptions extends SortOptions {
   /**
    * @deprecated Ignored. The removed /tokens/{address}/pools endpoint could
    * filter by a second token; the /pools/search endpoint that replaced it has
-   * no pair filter (repeating token_address is last-wins on the API side).
+   * no pair filter. Repeating token_address does not act as a pair filter;
+   * the API uses only one of the values (not guaranteed by order).
    * Filter the returned pools client-side to match a pair.
    */
   pairWith?: string;

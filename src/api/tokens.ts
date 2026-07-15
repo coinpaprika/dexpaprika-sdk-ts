@@ -55,8 +55,9 @@ export class TokensAPI extends BaseAPI {
     if (options?.cursor) params.cursor = options.cursor;
 
     // Note: options.pairWith is deprecated and intentionally not sent.
-    // /pools/search has no pair filter and repeating token_address is
-    // last-wins on the API side, not a pair filter.
+    // /pools/search has no pair filter. Repeating token_address does not
+    // act as a pair filter; the API uses only one of the values (not
+    // guaranteed by order).
     return this._get<PoolSearchResponse>(
       `/networks/${networkId}/pools/search`,
       params

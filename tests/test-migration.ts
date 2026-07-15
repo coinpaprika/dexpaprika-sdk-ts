@@ -69,7 +69,7 @@ async function testMigration() {
         throw new Error(`Pool ${pool.id} does not contain the requested token`);
       }
     }
-    console.log(`✅ ${wethPools.results.length} pools, all contain WETH`);
+    console.log(`PASS: ${wethPools.results.length} pools, all contain WETH`);
 
     if (!wethPools.has_next_page || !wethPools.next_cursor) {
       throw new Error('Expected a next cursor for WETH pools');
@@ -81,7 +81,7 @@ async function testMigration() {
     if (wethPage2.results.length === 0 || wethPage2.results[0].id === wethPools.results[0].id) {
       throw new Error('Cursor pagination did not advance to the next page');
     }
-    console.log('✅ Cursor pagination works for token pools');
+    console.log('PASS: Cursor pagination works for token pools');
 
     // Test 6: Show migration example
     console.log('\n6. Migration example:');
