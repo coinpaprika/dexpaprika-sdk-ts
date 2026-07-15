@@ -56,8 +56,35 @@ async function testMigration() {
       }
     }
     
-    // Test 5: Show migration example
-    console.log('\n5. Migration example:');
+    // Test 5: tokens.getPools() now targets /pools/search with token_address
+    console.log('\n5. Testing tokens.getPools() against /pools/search...');
+    const weth = '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2';
+    const wethPools = await client.tokens.getPools('ethereum', weth, { limit: 3 });
+    if (wethPools.results.length === 0) {
+      throw new Error('Expected WETH pools, got an empty result set');
+    }
+    for (const pool of wethPools.results) {
+      const ids = (pool.tokens ?? []).map(t => t.id);
+      if (!ids.includes(weth)) {
+        throw new Error(`Pool ${pool.id} does not contain the requested token`);
+      }
+    }
+    console.log(`PASS: ${wethPools.results.length} pools, all contain WETH`);
+
+    if (!wethPools.has_next_page || !wethPools.next_cursor) {
+      throw new Error('Expected a next cursor for WETH pools');
+    }
+    const wethPage2 = await client.tokens.getPools('ethereum', weth, {
+      limit: 3,
+      cursor: wethPools.next_cursor,
+    });
+    if (wethPage2.results.length === 0 || wethPage2.results[0].id === wethPools.results[0].id) {
+      throw new Error('Cursor pagination did not advance to the next page');
+    }
+    console.log('PASS: Cursor pagination works for token pools');
+
+    // Test 6: Show migration example
+    console.log('\n6. Migration example:');
     console.log('❌ OLD (deprecated):');
     console.log('   const pools = await client.pools.list();');
     console.log('✅ NEW (required):');

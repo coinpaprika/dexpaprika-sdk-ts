@@ -4,9 +4,9 @@ import {
   TokenSearchResponse,
   TokenPrice,
 } from '../models/tokens';
-import { PoolPaginatedResponse } from '../models/base';
+import { PoolSearchResponse } from '../models/base';
 import { TokenPoolsOptions, TopTokensOptions, TokenFilterOptions } from '../models/options';
-import { mapTokenSortField, mapTokenFilterParams } from '../utils/searchParams';
+import { mapTokenSortField, mapPoolSortField, mapTokenFilterParams } from '../utils/searchParams';
 
 /**
  * API service for token-related endpoints.
@@ -24,32 +24,42 @@ export class TokensAPI extends BaseAPI {
   }
   
   /**
-   * Get a list of top liquidity pools for a specific token on a network.
-   * 
+   * Get a list of top liquidity pools that contain a specific token on a network.
+   *
+   * Backed by the unified /networks/{network}/pools/search endpoint with its
+   * `token_address` parameter (the old /tokens/{address}/pools endpoint was
+   * removed, HTTP 410). The filter is network-scoped only: the cross-network
+   * /pools/search endpoint accepts `token_address` but silently ignores it, so
+   * a network is always required here. Legacy `orderBy` values (e.g.
+   * 'volume_usd') are mapped to canonical sort fields; the endpoint is
+   * cursor-paginated (pass `cursor`; read `has_next_page`/`next_cursor` from
+   * the response; `page` is ignored). An unknown token address returns an
+   * empty result set, not an error.
+   *
    * @param networkId - Network ID (e.g., "ethereum", "solana")
    * @param tokenAddress - Token address or identifier
-   * @param options - Options for pagination, sorting, and filtering
-   * @returns Response containing a list of pools that include the specified token
+   * @param options - Sorting, limit and cursor pagination options
+   * @returns Search response with pools that contain the specified token
    */
   async getPools(
-    networkId: string, 
+    networkId: string,
     tokenAddress: string,
     options?: TokenPoolsOptions
-  ): Promise<PoolPaginatedResponse> {
-    // build params
-    const params: Record<string, any> = { 
-      page: options?.page ?? 0, 
-      limit: options?.limit ?? 10, 
-      sort: options?.sort ?? 'desc', 
-      order_by: options?.orderBy ?? 'volume_usd' 
+  ): Promise<PoolSearchResponse> {
+    const params: Record<string, any> = {
+      token_address: tokenAddress,
+      limit: options?.limit ?? 10,
+      sort: options?.sort ?? 'desc',
+      order_by: mapPoolSortField(options?.orderBy),
     };
-    
-    // add pair token if specified
-    if (options?.pairWith) params['address'] = options.pairWith;
-    
-    // get pools filtered by token
-    return this._get<PoolPaginatedResponse>(
-      `/networks/${networkId}/tokens/${tokenAddress}/pools`,
+    if (options?.cursor) params.cursor = options.cursor;
+
+    // Note: options.pairWith is deprecated and intentionally not sent.
+    // /pools/search has no pair filter. Repeating token_address does not
+    // act as a pair filter; the API uses only one of the values (not
+    // guaranteed by order).
+    return this._get<PoolSearchResponse>(
+      `/networks/${networkId}/pools/search`,
       params
     );
   }
