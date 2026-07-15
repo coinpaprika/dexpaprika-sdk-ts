@@ -35,8 +35,15 @@ export interface PoolListOptions extends SortOptions {
  * Options for getting token pools
  */
 export interface TokenPoolsOptions extends SortOptions {
-  /** Optional second token address to filter for pairs */
+  /**
+   * @deprecated Ignored. The removed /tokens/{address}/pools endpoint could
+   * filter by a second token; the /pools/search endpoint that replaced it has
+   * no pair filter (repeating token_address is last-wins on the API side).
+   * Filter the returned pools client-side to match a pair.
+   */
   pairWith?: string;
+  /** @deprecated The search endpoint is cursor-paginated; `page` is ignored. Use `cursor`. */
+  page?: number;
 }
 
 /**

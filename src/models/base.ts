@@ -23,14 +23,14 @@ export interface DexPaginatedResponse {
   page_info: PageInfo;
 }
 
-// pool list response (still-valid /dexes/{dex}/pools and /tokens/{addr}/pools)
+// pool list response (still-valid /dexes/{dex}/pools)
 export interface PoolPaginatedResponse {
   pools: Pool[];
   page_info: PageInfo;
 }
 
 // Response from the cursor-paginated /networks/{network}/pools/search endpoint.
-// Used by both pools.listByNetwork() and pools.filter().
+// Used by pools.listByNetwork(), pools.filter() and tokens.getPools().
 export interface PoolSearchResponse {
   results: FilteredPool[];
   has_next_page?: boolean;

@@ -87,15 +87,15 @@ const poolDetails = await client.pools.getDetails(
   { inversed: false }
 );
 
-// Get token pools with additional filters
+// Get pools that contain a token (network-scoped /pools/search filter,
+// cursor-paginated: rows under `results`, page via `cursor`)
 const tokenPools = await client.tokens.getPools(
   'ethereum',
   '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', // WETH
   {
-    limit: 5, 
-    sort: 'desc', 
-    orderBy: 'volume_usd',
-    pairWith: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48' // Filter for USDC pairs
+    limit: 5,
+    sort: 'desc',
+    orderBy: 'volume_usd_24h' // legacy 'volume_usd' is also accepted and mapped
   }
 );
 
@@ -233,17 +233,27 @@ const token = await client.tokens.getDetails(
   '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
 );
 
-// Find WETH-USDC pools
+// Find WETH pools (network-scoped /pools/search with token_address).
+// Rows come back under `results`; page with `cursor` from `next_cursor`.
 const pools = await client.tokens.getPools(
   'ethereum', 
   '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', // WETH
   {
-    page: 0,
     limit: 10,
     sort: 'desc',
-    orderBy: 'volume_usd',
-    pairWith: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48' // USDC
+    orderBy: 'volume_usd_24h'
   }
+);
+for (const p of pools.results) {
+  console.log(p.id, p.volume_usd_24h);
+}
+
+// The removed /tokens/{address}/pools endpoint supported pair queries
+// (`pairWith`); /pools/search has no equivalent, so `pairWith` is deprecated
+// and ignored. To match a pair, filter client-side:
+const usdc = '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48';
+const wethUsdcPools = pools.results.filter(
+  p => (p.tokens ?? []).some(t => t.id === usdc)
 );
 ```
 

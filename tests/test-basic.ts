@@ -67,11 +67,11 @@ async function main() {
       const token = await client.tokens.getDetails('ethereum', weth);
       console.log(`WETH details: ${token.name} (${token.symbol})`);
       
+      // Token pools are served by the cursor-paginated /pools/search endpoint
       const wethPools = await client.tokens.getPools('ethereum', weth, {
-        page: 0,
         limit: 3
       });
-      console.log(`WETH is in ${wethPools.pools.length} pools`);
+      console.log(`WETH is in ${wethPools.results.length} pools`);
     } catch (err: any) {
       console.log(`Token error: ${err.message || 'Unknown error'}`);
     }
