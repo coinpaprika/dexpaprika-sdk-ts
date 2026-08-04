@@ -9,7 +9,7 @@ import {
 async function main() {
   const client = new DexPaprikaClient();
 
-  console.log('🔄 DexPaprika SDK Migration Example\n');
+  console.log('DexPaprika SDK Migration Example\n');
 
   // Demonstrate deprecated method error
   console.log('1. Attempting to use deprecated pools.list() method:');
@@ -17,7 +17,7 @@ async function main() {
     await client.pools.list();
   } catch (error) {
     if (error instanceof DeprecatedEndpointError) {
-      console.log('❌ Caught DeprecatedEndpointError:');
+      console.log('Caught DeprecatedEndpointError:');
       console.log(`   ${error.message}\n`);
     }
   }
@@ -30,14 +30,14 @@ async function main() {
       sort: 'desc',
       orderBy: 'volume_usd_24h'
     });
-    console.log(`✅ Successfully fetched ${ethereumPools.results.length} Ethereum pools`);
+    console.log(`Successfully fetched ${ethereumPools.results.length} Ethereum pools`);
 
     // Show multiple networks
     const solanaPools = await client.pools.listByNetwork('solana', { limit: 2 });
-    console.log(`✅ Successfully fetched ${solanaPools.results.length} Solana pools`);
+    console.log(`Successfully fetched ${solanaPools.results.length} Solana pools`);
 
     const fantomPools = await client.pools.listByNetwork('fantom', { limit: 2 });
-    console.log(`✅ Successfully fetched ${fantomPools.results.length} Fantom pools\n`);
+    console.log(`Successfully fetched ${fantomPools.results.length} Fantom pools\n`);
   } catch (error) {
     console.error('Unexpected error:', error);
   }
@@ -50,9 +50,9 @@ async function main() {
     await client.pools.listByNetwork('nonexistent-network');
   } catch (error) {
     if (error instanceof NetworkNotFoundError) {
-      console.log(`❌ Network error: ${error.message}`);
+      console.log(`Network error: ${error.message}`);
     } else if (error instanceof ApiError) {
-      console.log(`❌ API error: ${error.message}`);
+      console.log(`API error: ${error.message}`);
     }
   }
 
@@ -60,17 +60,17 @@ async function main() {
   try {
     await client.pools.listByNetwork('');
   } catch (error: any) {
-    console.log(`❌ Validation error: ${error.message}`);
+    console.log(`Validation error: ${error.message}`);
   }
 
-  console.log('\n📚 Migration Summary:');
+  console.log('\nMigration Summary:');
   console.log('   OLD: await client.pools.list()');
   console.log('   NEW: await client.pools.listByNetwork(\'ethereum\')');
   console.log('\n   For more networks:');
   console.log('   - await client.pools.listByNetwork(\'solana\')');
   console.log('   - await client.pools.listByNetwork(\'fantom\')');
   console.log('   - await client.pools.listByNetwork(\'arbitrum\')');
-  console.log('\n✅ Migration complete!');
+  console.log('\nMigration complete!');
 }
 
 main(); 
