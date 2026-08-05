@@ -32,10 +32,10 @@ if (first.next_cursor) {
 **Breaking changes in v1.4.0**: The global pools endpoint has been deprecated. All pool queries now require a network specification.
 
 ```javascript
-// ❌ OLD (deprecated) - will throw DeprecatedEndpointError:
+// OLD (deprecated) - will throw DeprecatedEndpointError:
 const pools = await client.pools.list();
 
-// ✅ NEW (required) - specify network:
+// NEW (required) - specify network:
 const ethereumPools = await client.pools.listByNetwork('ethereum');
 const solanaPools = await client.pools.listByNetwork('solana');
 ```
