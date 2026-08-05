@@ -23,14 +23,20 @@ export interface DexPaginatedResponse {
   page_info: PageInfo;
 }
 
-// pool list response (still-valid /dexes/{dex}/pools)
+/**
+ * @deprecated No pools endpoint returns this shape any more. The last one that
+ * did, /networks/{network}/dexes/{dex}/pools, was removed and answers HTTP 410.
+ * Every pools listing returns {@link PoolSearchResponse}: rows under `results`,
+ * cursor pagination, and no `page_info`.
+ */
 export interface PoolPaginatedResponse {
   pools: Pool[];
   page_info: PageInfo;
 }
 
 // Response from the cursor-paginated /networks/{network}/pools/search endpoint.
-// Used by pools.listByNetwork(), pools.filter() and tokens.getPools().
+// Used by pools.listByNetwork(), pools.listByDex(), pools.filter() and
+// tokens.getPools().
 export interface PoolSearchResponse {
   results: FilteredPool[];
   has_next_page?: boolean;

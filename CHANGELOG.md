@@ -2,6 +2,19 @@
 
 All notable changes to the DexPaprika SDK will be documented in this file.
 
+## Unreleased
+
+### Breaking Changes
+- The DexPaprika API removed `GET /networks/{network}/dexes/{dex}/pools` (now HTTP 410). `pools.listByDex()` now calls the unified `/networks/{network}/pools/search` endpoint and sends the DEX as the `dex_name` query parameter. The arguments are unchanged.
+- `pools.listByDex()` returns `PoolSearchResponse`, the cursor-paginated shape `{ results, has_next_page, next_cursor }`, instead of `{ pools, page_info }`. This is a return-type change: code reading `.pools` or `.page_info` from it will not compile. Read the next page from `next_cursor` and pass it back via `cursor` (`page` is ignored).
+- Rows are the search shape: `volume_usd_24h`, `volume_usd_7d`, `volume_usd_30d`, `transactions_24h`, `liquidity_usd` and `price_change_percentage_*`. The API no longer returns a bare `volume_usd`, a bare `transactions`, or the `last_price_change_usd_*` fields on pool rows.
+- `dex_name` accepts both the DEX id (`curve`) and the display name (`Curve`). Pass the id, which is what `client.networks.getDexes()` returns as `dex_id`. Legacy `orderBy` values (e.g. `volume_usd`) are mapped to canonical sort fields internally.
+- `PoolPaginatedResponse` is deprecated. No pools endpoint returns that shape any more.
+
+### Added
+- `SearchPool.price_change_percentage_6h`, which `/pools/search` returns but the SDK type was omitting.
+- `npm run test:dex-pools`, which pins the request `listByDex` puts on the wire and checks both directions against the live API.
+
 ## 1.7.0 (2026-07-15)
 
 ### Breaking Changes
