@@ -8,7 +8,7 @@ All notable changes to the DexPaprika SDK will be documented in this file.
 - The DexPaprika API removed `GET /networks/{network}/dexes/{dex}/pools` (now HTTP 410). `pools.listByDex()` now calls the unified `/networks/{network}/pools/search` endpoint and sends the DEX as the `dex_name` query parameter. The arguments are unchanged.
 - `pools.listByDex()` returns `PoolSearchResponse`, the cursor-paginated shape `{ results, has_next_page, next_cursor }`, instead of `{ pools, page_info }`. This is a return-type change: code reading `.pools` or `.page_info` from it will not compile. Read the next page from `next_cursor` and pass it back via `cursor` (`page` is ignored).
 - Rows are the search shape: `volume_usd_24h`, `volume_usd_7d`, `volume_usd_30d`, `transactions_24h`, `liquidity_usd` and `price_change_percentage_*`. The API no longer returns a bare `volume_usd`, a bare `transactions`, or the `last_price_change_usd_*` fields on pool rows.
-- `dex_name` accepts both the DEX id (`curve`) and the display name (`Curve`). Pass the id, which is what `client.networks.getDexes()` returns as `dex_id`. Legacy `orderBy` values (e.g. `volume_usd`) are mapped to canonical sort fields internally.
+- Despite its name, `dex_name` matches the DEX **id** (case-insensitively), which is what `client.networks.getDexes()` returns as `dex_id`. Passing a human display name such as `Uniswap V3` (the `dex_name` field of that same response) returns HTTP 200 with an empty result set instead of an error, so a wrong value here fails silently. Legacy `orderBy` values (e.g. `volume_usd`) are mapped to canonical sort fields internally.
 - `PoolPaginatedResponse` is deprecated. No pools endpoint returns that shape any more.
 
 ### Added

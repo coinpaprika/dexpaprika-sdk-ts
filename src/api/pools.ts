@@ -81,9 +81,11 @@ export class PoolsAPI extends BaseAPI {
    *
    * The API removed /networks/{network}/dexes/{dex}/pools (it returns HTTP 410),
    * so this is backed by the unified /networks/{network}/pools/search endpoint
-   * with the DEX passed as the `dex_name` filter. `dex_name` resolves both the
-   * DEX id ('curve') and the display name ('Curve'); prefer the id, which is
-   * what `client.networks.getDexes()` returns as `dex_id`.
+   * with the DEX passed as the `dex_name` filter. Despite that name, the filter
+   * matches the DEX id, case-insensitively, so `dexId` must be what
+   * `client.networks.getDexes()` returns as `dex_id` ('uniswap_v3'), not that
+   * response's `dex_name` ('Uniswap V3'). A display name returns HTTP 200 with an
+   * empty result set rather than an error, so a wrong value here fails silently.
    *
    * Legacy `orderBy` values (e.g. 'volume_usd') are accepted and mapped to
    * canonical sort fields; pass `cursor` for the next page (the response carries
