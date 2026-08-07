@@ -276,6 +276,37 @@ console.log(`Found ${filtered.results.length} pools matching criteria`);
 // Next page: pass filtered.next_cursor as `cursor`
 ```
 
+`pools.filter()` also takes price-change bounds on four windows: 24h, 6h, 1h and
+5m. The values are percentages, and a negative bound is the ordinary way to ask
+for pools that fell.
+
+```js
+// Pools up at least 50% in the last hour, biggest mover first
+const gainers = await client.pools.filter('ethereum', {
+  priceChange1hMin: 50,
+  sortBy: 'price_change_percentage_1h',
+  limit: 10
+});
+
+// Pools down at least 20% on the day
+const losers = await client.pools.filter('ethereum', {
+  priceChange24hMax: -20,
+  limit: 10
+});
+```
+
+Every window has a `Min` and a `Max` form: `priceChange24hMin`/`Max`,
+`priceChange6hMin`/`Max`, `priceChange1hMin`/`Max`, `priceChange5mMin`/`Max`.
+
+Pool sort fields: `volume_usd_24h`, `volume_usd_7d`, `volume_usd_30d`,
+`liquidity_usd`, `txns_24h`, `created_at`, `price_usd`,
+`price_change_percentage_24h`, `price_change_percentage_6h`,
+`price_change_percentage_1h`, `price_change_percentage_5m`.
+
+The 6h, 1h and 5m windows are pools-only. The token search endpoint rejects them
+with HTTP 400 and token rows carry no such field, so `tokens.getTop()` and
+`tokens.filter()` do not take them.
+
 ### Top Tokens & Token Filtering
 
 Both are backed by `/networks/{network}/tokens/search` and return

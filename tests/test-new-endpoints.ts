@@ -1,5 +1,6 @@
 /// <reference types="node" />
 import { DexPaprikaClient } from '../src';
+import { mapPoolSortField, mapTokenSortField } from '../src/utils/searchParams';
 
 // Test all 4 new endpoints against the live API
 async function main() {
@@ -43,6 +44,91 @@ async function main() {
     });
     if (!result.results) throw new Error('No results');
     console.log(`   Got ${result.results.length} pools with multi-filter`);
+  });
+
+  // 1b. Price-change windows on pools/search.
+  // /pools/search ignores query parameters it does not recognize and still
+  // answers 200, so a dropped or misspelled bound looks exactly like a wide
+  // filter. Every check below compares against an unfiltered baseline or an
+  // independently sorted page instead of trusting the status code.
+  await test('pools.filter - 1h price change bound applies', async () => {
+    const baseline = await client.pools.filter('ethereum', { limit: 5 });
+    const baselineChanges = baseline.results.map(p => p.price_change_percentage_1h ?? 0);
+    if (baselineChanges.length === 0) throw new Error('No baseline results');
+    if (baselineChanges.every(c => c >= 50)) {
+      throw new Error(`Baseline already clears the bound, so it proves nothing: ${baselineChanges}`);
+    }
+
+    const gainers = await client.pools.filter('ethereum', { priceChange1hMin: 50, limit: 5 });
+    if (gainers.results.length === 0) throw new Error('No pools up 50% in an hour');
+    for (const pool of gainers.results) {
+      const change = pool.price_change_percentage_1h;
+      if (change === undefined || change === null || change < 50) {
+        throw new Error(`Pool ${pool.id} reports a 1h change of ${change}, the bound was 50`);
+      }
+    }
+    const shown = (xs: (number | null | undefined)[]) => xs.map(x => (x ?? 0).toFixed(3)).join(', ');
+    console.log(`   Baseline ${shown(baselineChanges)} vs filtered ${shown(gainers.results.map(p => p.price_change_percentage_1h))}`);
+  });
+
+  await test('pools.filter - negative 24h bound applies', async () => {
+    // A max on a price change is usually negative. -20 means down at least a fifth.
+    const losers = await client.pools.filter('ethereum', { priceChange24hMax: -20, limit: 5 });
+    if (losers.results.length === 0) throw new Error('No pools down 20% on the day');
+    for (const pool of losers.results) {
+      const change = pool.price_change_percentage_24h;
+      if (change === undefined || change === null || change > -20) {
+        throw new Error(`Pool ${pool.id} reports a 24h change of ${change}, the bound was -20`);
+      }
+    }
+    console.log(`   ${losers.results.length} pools down at least 20% on the day`);
+  });
+
+  await test('pools.filter - sorting by a short price-change window', async () => {
+    const byVolume = await client.pools.filter('ethereum', { sortBy: 'volume_usd_24h', limit: 5 });
+    const byChange = await client.pools.filter('ethereum', { sortBy: 'price_change_percentage_1h', limit: 5 });
+    if (byChange.results.length === 0) throw new Error('No results');
+    // An unknown sort field folds to volume_usd_24h before the request goes
+    // out, which would hand back the volume-sorted page with a 200.
+    if (byChange.results[0].id === byVolume.results[0].id) {
+      throw new Error('Sorting by 1h price change returned the volume-sorted page');
+    }
+    let previous = Infinity;
+    for (const pool of byChange.results) {
+      const change = pool.price_change_percentage_1h ?? -Infinity;
+      if (change > previous) {
+        throw new Error(`Page is not ordered by 1h change: ${change} came after ${previous}`);
+      }
+      previous = change;
+    }
+    console.log(`   Top 1h mover: ${byChange.results[0].price_change_percentage_1h?.toFixed(2)}%`);
+  });
+
+  await test('price-change windows are pools only', async () => {
+    const windows = [
+      'price_change_percentage_6h',
+      'price_change_percentage_1h',
+      'price_change_percentage_5m',
+    ];
+    for (const field of windows) {
+      if (mapPoolSortField(field) !== field) {
+        throw new Error(`mapPoolSortField('${field}') gave '${mapPoolSortField(field)}', expected pass-through`);
+      }
+      // tokens/search answers 400 on these windows, so folding them to the
+      // default is the correct behaviour rather than a gap to be filled.
+      if (mapTokenSortField(field) !== 'volume_usd_24h') {
+        throw new Error(`mapTokenSortField('${field}') gave '${mapTokenSortField(field)}', expected the volume_usd_24h fallback`);
+      }
+    }
+    const tokens = await client.tokens.getTop('ethereum', { limit: 1 });
+    if (tokens.results.length === 0) throw new Error('No tokens');
+    const row = tokens.results[0] as unknown as Record<string, unknown>;
+    for (const field of windows) {
+      if (row[field] !== undefined) {
+        throw new Error(`Token rows now carry ${field}; recheck whether tokens/search accepts the window`);
+      }
+    }
+    console.log('   Pool sort fields pass through, token sort fields fall back, token rows carry no short window');
   });
 
   // 2. Top Tokens

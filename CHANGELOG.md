@@ -2,6 +2,17 @@
 
 All notable changes to the DexPaprika SDK will be documented in this file.
 
+## 1.8.0 (2026-08-07)
+
+### Added
+- `pools.filter()` accepts price-change bounds on all four windows the pools/search endpoint supports: `priceChange24hMin`/`Max`, `priceChange6hMin`/`Max`, `priceChange1hMin`/`Max`, `priceChange5mMin`/`Max`. Values are percentages and negative bounds are meaningful, so `priceChange24hMax: -20` selects pools down at least a fifth on the day.
+- `price_change_percentage_6h`, `price_change_percentage_1h` and `price_change_percentage_5m` are accepted as pool sort fields (`orderBy`/`sortBy`) and reach the API unchanged.
+- `SearchPool` gained the `price_change_percentage_6h` field that pool rows already return.
+- `npm run test:endpoints` runs the live endpoint suite, which now pins the pools-only behaviour of the short windows.
+
+### Notes
+- The 6h, 1h and 5m windows exist on pools only. `/networks/{network}/tokens/search` returns HTTP 400 for them and token rows carry no such field, so `TOKEN_SORT_FIELD_MAP` leaves them out on purpose and folds them to the default `volume_usd_24h`.
+
 ## 1.7.0 (2026-07-15)
 
 ### Breaking Changes
