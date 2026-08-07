@@ -2,6 +2,21 @@
 
 All notable changes to the DexPaprika SDK will be documented in this file.
 
+## 1.8.0 (2026-08-07)
+
+### Added
+- `pools.filter()` accepts price-change bounds on all four windows the pools/search endpoint supports: `priceChange24hMin`/`Max`, `priceChange6hMin`/`Max`, `priceChange1hMin`/`Max`, `priceChange5mMin`/`Max`. Values are percentages and negative bounds are meaningful, so `priceChange24hMax: -20` selects pools down at least a fifth on the day.
+- `tokens.filter()` accepts `priceChange24hMin`/`Max`. The 24h window is the one price-change bound `/networks/{network}/tokens/search` applies.
+- `price_change_percentage_6h`, `price_change_percentage_1h` and `price_change_percentage_5m` are accepted as pool sort fields (`orderBy`/`sortBy`) and reach the API unchanged.
+- `SearchPool` gained the `price_change_percentage_6h` field that pool rows already return.
+
+### Fixed
+- The test scripts run again. They invoked `ts-node`, which fails to start against the TypeScript 7 this SDK builds with, so `npm test` and every script chained after it died before executing anything. They now run under `tsx`, and `ts-node` is gone from the devDependencies.
+
+### Notes
+- The three short windows, 6h, 1h and 5m, exist on pools only, and they fail two different ways on `/networks/{network}/tokens/search`: HTTP 400 as a sort value, silently ignored as a filter bound. `TOKEN_SORT_FIELD_MAP` leaves them out on purpose and folds them to the default `volume_usd_24h`, and `TokenFilterOptions` does not offer them. The 24h window works on both endpoints, for sorting and for filtering.
+- Both search endpoints answer 200 for query parameters they do not recognize and then ignore them, so a bound the SDK spelled wrong would come back as a full unfiltered page. `tests/test-search-params.ts` pins the exact parameter names the SDK puts on the wire without touching the network.
+
 ## 1.7.0 (2026-07-15)
 
 ### Breaking Changes
