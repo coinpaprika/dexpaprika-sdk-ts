@@ -113,8 +113,9 @@ export interface PoolFilterOptions {
   txns24hMin?: number;
   // Price-change bounds, in percent, on the four windows pools/search supports.
   // Negative values are meaningful and common: priceChange24hMax: -20 finds
-  // pools down at least a fifth on the day. These windows are pools only; the
-  // token search endpoint does not accept them.
+  // pools down at least a fifth on the day. The 24h window also works on
+  // tokens/search (see TokenFilterOptions); the 6h, 1h and 5m windows are
+  // pools only, and tokens/search ignores them without an error.
   /** Minimum 24h price change, in percent */
   priceChange24hMin?: number;
   /** Maximum 24h price change, in percent */
@@ -179,6 +180,14 @@ export interface TokenFilterOptions {
   fdvMax?: number;
   /** Minimum 24h transaction count */
   txns24hMin?: number;
+  // Only the 24h price-change window is bounded here. tokens/search accepts
+  // price_change_percentage_24h_min and _max and applies them; it ignores the
+  // 6h, 1h and 5m bounds silently, so offering those options would return a
+  // full unfiltered page that looks like a successful filter.
+  /** Minimum 24h price change, in percent */
+  priceChange24hMin?: number;
+  /** Maximum 24h price change, in percent */
+  priceChange24hMax?: number;
   /** Only tokens created after this Unix timestamp */
   createdAfter?: number | string;
   /** Only tokens created before this Unix timestamp */

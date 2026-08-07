@@ -94,12 +94,19 @@ export class TokensAPI extends BaseAPI {
   }
 
   /**
-   * Filter tokens on a network by volume, liquidity, FDV, transactions, and creation date.
+   * Filter tokens on a network by volume, liquidity, FDV, transactions, 24h
+   * price change, and creation date.
    *
    * Backed by the unified /networks/{network}/tokens/search endpoint. The request
    * sends `order_by` (mapped from the legacy `sortBy`) and `sort` (direction),
    * and is cursor-paginated (pass `cursor`; read `has_next_page`/`next_cursor`
    * from the response). Legacy filter param names are mapped to canonical ones.
+   *
+   * The endpoint answers 200 for query parameters it does not recognize and
+   * ignores them, so a bound it does not support looks exactly like a wide
+   * filter. Only the 24h price-change window is bounded here; the 6h, 1h and
+   * 5m bounds are accepted and ignored by this endpoint, so the SDK does not
+   * offer them. They work on `pools.filter()`.
    *
    * @param networkId - Network ID (e.g., "ethereum", "solana")
    * @param options - Filter criteria and cursor pagination options
@@ -123,6 +130,8 @@ export class TokensAPI extends BaseAPI {
     if (options?.fdvMin !== undefined) filters.fdv_min = options.fdvMin;
     if (options?.fdvMax !== undefined) filters.fdv_max = options.fdvMax;
     if (options?.txns24hMin !== undefined) filters.txns_24h_min = options.txns24hMin;
+    if (options?.priceChange24hMin !== undefined) filters.price_change_percentage_24h_min = options.priceChange24hMin;
+    if (options?.priceChange24hMax !== undefined) filters.price_change_percentage_24h_max = options.priceChange24hMax;
     if (options?.createdAfter !== undefined) filters.created_after = options.createdAfter;
     if (options?.createdBefore !== undefined) filters.created_before = options.createdBefore;
     Object.assign(params, mapTokenFilterParams(filters));
