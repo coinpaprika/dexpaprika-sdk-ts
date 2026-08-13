@@ -15,6 +15,28 @@ npm install dexpaprika-sdk
 
 ## Important: migration notices
 
+**Breaking change, unreleased**: The API removed `GET /networks/{network}/dexes/{dex}/pools` (now HTTP 410). `pools.listByDex()` keeps its arguments but is backed by the unified search endpoint with a `dex_name` filter, so it returns the cursor-paginated shape `{ results, has_next_page, next_cursor }` instead of `{ pools, page_info }`.
+
+```javascript
+// The call site is unchanged, the response shape is not:
+const curvePools = await client.pools.listByDex('ethereum', 'curve', { limit: 10 });
+console.log(curvePools.results.length, curvePools.has_next_page);
+
+// Page with the cursor, not a page number:
+if (curvePools.next_cursor) {
+  const next = await client.pools.listByDex('ethereum', 'curve', {
+    limit: 10,
+    cursor: curvePools.next_cursor
+  });
+}
+```
+
+Rows are the search shape: read `volume_usd_24h`, `transactions_24h` and the
+`price_change_percentage_*` fields. There is no bare `volume_usd` and no
+`page_info`. The DEX argument accepts either the id (`curve`) or the display
+name (`Curve`); pass the id, which is what `client.networks.getDexes()` returns
+as `dex_id`.
+
 **Breaking changes in v1.6.0**: The API removed the per-network list/filter REST endpoints (now HTTP 410). `pools.listByNetwork()`, `pools.filter()`, `tokens.getTop()`, and `tokens.filter()` now call the unified search endpoints and return the cursor-paginated shape `{ results, has_next_page, next_cursor }`. Method signatures are unchanged; legacy sort/filter values are mapped internally. See the [CHANGELOG](./CHANGELOG.md) for field-level details.
 
 ```javascript
@@ -189,6 +211,13 @@ if (topPools.has_next_page && topPools.next_cursor) {
 // Top pools on different networks
 const solanaPools = await client.pools.listByNetwork('solana', { limit: 5 });
 const fantomPools = await client.pools.listByNetwork('fantom', { limit: 5 });
+
+// Pools on one DEX (cursor-paginated; the DEX travels as the dex_name filter)
+const curvePools = await client.pools.listByDex('ethereum', 'curve', {
+  limit: 10,
+  orderBy: 'volume_usd_24h'
+});
+console.log(`Got ${curvePools.results.length} Curve pools`);
 
 // Pool details
 const poolDetails = await client.pools.getDetails(
@@ -483,6 +512,9 @@ npm run test:params
 
 # Hit the live search endpoints
 npm run test:endpoints
+
+# Pin the request listByDex puts on the wire, then check it against the live API
+npm run test:dex-pools
 
 # Run all tests sequentially
 npm run test:all

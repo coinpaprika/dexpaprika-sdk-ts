@@ -77,33 +77,46 @@ export class PoolsAPI extends BaseAPI {
   }
   
   /**
-   * Get pools on a specific DEX within a network with pagination.
-   * 
+   * Get pools on a specific DEX within a network, cursor-paginated and sorted.
+   *
+   * The API removed /networks/{network}/dexes/{dex}/pools (it returns HTTP 410),
+   * so this is backed by the unified /networks/{network}/pools/search endpoint
+   * with the DEX passed as the `dex_name` filter. Despite that name, the filter
+   * matches the DEX id, case-insensitively, so `dexId` must be what
+   * `client.networks.getDexes()` returns as `dex_id` ('uniswap_v3'), not that
+   * response's `dex_name` ('Uniswap V3'). A display name returns HTTP 200 with an
+   * empty result set rather than an error, so a wrong value here fails silently.
+   *
+   * Legacy `orderBy` values (e.g. 'volume_usd') are accepted and mapped to
+   * canonical sort fields; pass `cursor` for the next page (the response carries
+   * `has_next_page` and `next_cursor`). `page` is ignored.
+   *
    * @param networkId - Network identifier (e.g., 'ethereum', 'solana')
-   * @param dexId - DEX identifier (e.g., 'uniswap_v2', 'sushiswap')
-   * @param options - Options for filtering, pagination and sorting
-   * @returns Paginated list of pools on the specified DEX
+   * @param dexId - DEX identifier (e.g., 'uniswap_v3', 'curve')
+   * @param options - Options for sorting, limit and cursor pagination
+   * @returns Search response with pool results on the specified DEX
    */
   async listByDex(
-    networkId: string, 
-    dexId: string, 
+    networkId: string,
+    dexId: string,
     options?: PoolListOptions
-  ): Promise<PoolPaginatedResponse> {
+  ): Promise<PoolSearchResponse> {
     if (!networkId) {
       throw new Error('Network ID is required');
     }
     if (!dexId) {
       throw new Error('DEX ID is required');
     }
-    
+
     const params: Record<string, any> = {
-      page: options?.page ?? 0,
+      dex_name: dexId,
       limit: options?.limit ?? 10,
       sort: options?.sort ?? 'desc',
-      order_by: options?.orderBy ?? 'volume_usd'
+      order_by: mapPoolSortField(options?.orderBy),
     };
-    
-    return this._get<PoolPaginatedResponse>(`/networks/${networkId}/dexes/${dexId}/pools`, params);
+    if (options?.cursor) params.cursor = options.cursor;
+
+    return this._get<PoolSearchResponse>(`/networks/${networkId}/pools/search`, params);
   }
   
   /**
