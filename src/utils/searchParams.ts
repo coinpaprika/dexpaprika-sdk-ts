@@ -28,11 +28,20 @@ const POOL_SORT_FIELD_MAP: Record<string, string> = {
   created_at: 'created_at',
   price_usd: 'price_usd',
   price_change_percentage_24h: 'price_change_percentage_24h',
+  // The three short price-change windows. Sorting by them is a pools/search
+  // feature: tokens/search answers 400, so TOKEN_SORT_FIELD_MAP deliberately
+  // does not list them. The 24h window above is common to both endpoints.
+  price_change_percentage_6h: 'price_change_percentage_6h',
+  price_change_percentage_1h: 'price_change_percentage_1h',
+  price_change_percentage_5m: 'price_change_percentage_5m',
 };
 
 // Tokens: legacy aliases plus canonical pass-through. Unknown -> default.
 // Note: tokens/search returns 400 on price ordering, so price_usd folds to the
-// default volume_usd_24h.
+// default volume_usd_24h even though the endpoint's own 400 message lists it.
+// price_change_percentage_24h is supported and passes through. The 6h, 1h and
+// 5m windows are not: tokens/search returns 400 for them as an order_by value
+// and token rows carry no such field, so they stay out of this map on purpose.
 const TOKEN_SORT_FIELD_MAP: Record<string, string> = {
   // legacy -> canonical
   volume_24h: 'volume_usd_24h',
@@ -103,7 +112,8 @@ function remapKeys(
 
 /**
  * Rename legacy pool filter param names to the canonical pools/search names.
- * Names not in the map (e.g. liquidity_usd_min, txns_24h_min) pass through.
+ * Names not in the map (e.g. liquidity_usd_min, txns_24h_min,
+ * price_change_percentage_1h_min) pass through.
  */
 export function mapPoolFilterParams(params: Record<string, any>): Record<string, any> {
   return remapKeys(params, POOL_FILTER_PARAM_MAP);

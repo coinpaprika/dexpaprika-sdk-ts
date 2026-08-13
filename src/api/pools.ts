@@ -226,12 +226,17 @@ export class PoolsAPI extends BaseAPI {
   }
 
   /**
-   * Filter pools on a network by volume, liquidity, transactions, and creation date.
+   * Filter pools on a network by volume, liquidity, transactions, price change,
+   * and creation date.
    *
    * Backed by the unified /networks/{network}/pools/search endpoint. The request
    * sends `order_by` (mapped from the legacy `sortBy`) and `sort` (direction),
    * and is cursor-paginated (pass `cursor`; read `has_next_page`/`next_cursor`
    * from the response). Legacy filter param names are mapped to canonical ones.
+   *
+   * The endpoint ignores query parameters it does not recognize and still
+   * answers 200, so a misspelled bound comes back as a full unfiltered page
+   * rather than an error. Compare against an unfiltered call when in doubt.
    *
    * @param networkId - Network identifier (e.g., 'ethereum', 'solana')
    * @param options - Filter criteria and cursor pagination options
@@ -260,6 +265,14 @@ export class PoolsAPI extends BaseAPI {
     if (options?.liquidityUsdMin !== undefined) filters.liquidity_usd_min = options.liquidityUsdMin;
     if (options?.liquidityUsdMax !== undefined) filters.liquidity_usd_max = options.liquidityUsdMax;
     if (options?.txns24hMin !== undefined) filters.txns_24h_min = options.txns24hMin;
+    if (options?.priceChange24hMin !== undefined) filters.price_change_percentage_24h_min = options.priceChange24hMin;
+    if (options?.priceChange24hMax !== undefined) filters.price_change_percentage_24h_max = options.priceChange24hMax;
+    if (options?.priceChange6hMin !== undefined) filters.price_change_percentage_6h_min = options.priceChange6hMin;
+    if (options?.priceChange6hMax !== undefined) filters.price_change_percentage_6h_max = options.priceChange6hMax;
+    if (options?.priceChange1hMin !== undefined) filters.price_change_percentage_1h_min = options.priceChange1hMin;
+    if (options?.priceChange1hMax !== undefined) filters.price_change_percentage_1h_max = options.priceChange1hMax;
+    if (options?.priceChange5mMin !== undefined) filters.price_change_percentage_5m_min = options.priceChange5mMin;
+    if (options?.priceChange5mMax !== undefined) filters.price_change_percentage_5m_max = options.priceChange5mMax;
     if (options?.createdAfter !== undefined) filters.created_after = options.createdAfter;
     if (options?.createdBefore !== undefined) filters.created_before = options.createdBefore;
     Object.assign(params, mapPoolFilterParams(filters));

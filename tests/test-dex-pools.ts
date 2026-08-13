@@ -103,7 +103,7 @@ const SEARCH_RESPONSE = JSON.stringify({
 const GONE_RESPONSE = JSON.stringify({
   code: 410,
   message: 'endpoint removed',
-  replacement: '/networks/:network/pools/search',
+  replacement: '/networks/{network}/pools/search',
 });
 
 async function main() {
@@ -165,10 +165,10 @@ async function main() {
           err instanceof DeprecatedEndpointError,
           `expected DeprecatedEndpointError, got ${err?.name ?? typeof err}`
         );
-        assertEqual(err.replacement, '/networks/:network/pools/search', 'error replacement');
+        assertEqual(err.replacement, '/networks/{network}/pools/search', 'error replacement');
         assertEqual(err.apiMessage, 'endpoint removed', 'error apiMessage');
         assert(
-          err.message.includes('/networks/:network/pools/search'),
+          err.message.includes('/networks/{network}/pools/search'),
           `error message should name the replacement, got: ${err.message}`
         );
       }
@@ -181,7 +181,7 @@ async function main() {
       validateStatus: () => true,
     });
     assertEqual(res.status, 410, 'old path status');
-    assertEqual(res.data?.replacement, '/networks/:network/pools/search', 'old path replacement');
+    assertEqual(res.data?.replacement, '/networks/{network}/pools/search', 'old path replacement');
     console.log(`      old path -> ${res.status} ${JSON.stringify(res.data)}`);
   });
 

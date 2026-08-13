@@ -1,6 +1,6 @@
 {
   "name": "dexpaprika-sdk",
-  "version": "1.7.0",
+  "version": "1.9.0",
   "description": "JavaScript SDK for the DexPaprika API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -8,14 +8,16 @@
     "build": "tsc",
     "clean": "rimraf dist",
     "prepublishOnly": "npm run clean && npm run build",
-    "test": "ts-node tests/test-basic.ts",
-    "test:migration": "ts-node tests/test-migration.ts",
-    "test:dex-pools": "ts-node tests/test-dex-pools.ts",
-    "test:all": "npm test && npm run verify && npm run verify:real && ts-node tests/test-token-summary.ts && npm run test:migration && npm run test:dex-pools",
-    "example": "ts-node examples/basic-example.ts",
-    "example:cache": "ts-node examples/retry-cache-example.ts",
-    "verify": "ts-node tests/test-retry-cache.ts",
-    "verify:real": "ts-node tests/test-real-world.ts"
+    "test": "tsx tests/test-basic.ts",
+    "test:migration": "tsx tests/test-migration.ts",
+    "test:params": "tsx tests/test-search-params.ts",
+    "test:endpoints": "tsx tests/test-new-endpoints.ts",
+    "test:dex-pools": "tsx tests/test-dex-pools.ts",
+    "test:all": "npm test && npm run verify && npm run verify:real && tsx tests/test-token-summary.ts && npm run test:migration && npm run test:params && npm run test:endpoints && npm run test:dex-pools",
+    "example": "tsx examples/basic-example.ts",
+    "example:cache": "tsx examples/retry-cache-example.ts",
+    "verify": "tsx tests/test-retry-cache.ts",
+    "verify:real": "tsx tests/test-real-world.ts"
   },
   "keywords": [
     "dexpaprika",
@@ -39,7 +41,7 @@
     "@types/node": "^26.0.1",
     "date-fns": "^4.1.0",
     "rimraf": "^6.0.1",
-    "ts-node": "^10.9.2",
+    "tsx": "^4.23.10",
     "typescript": "^7.0.2"
   },
   "files": [

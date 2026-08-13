@@ -305,6 +305,46 @@ console.log(`Found ${filtered.results.length} pools matching criteria`);
 // Next page: pass filtered.next_cursor as `cursor`
 ```
 
+`pools.filter()` also takes price-change bounds on four windows: 24h, 6h, 1h and
+5m. The values are percentages, and a negative bound is the ordinary way to ask
+for pools that fell.
+
+```js
+// Pools up at least 50% in the last hour, biggest mover first
+const gainers = await client.pools.filter('ethereum', {
+  priceChange1hMin: 50,
+  sortBy: 'price_change_percentage_1h',
+  limit: 10
+});
+
+// Pools down at least 20% on the day
+const losers = await client.pools.filter('ethereum', {
+  priceChange24hMax: -20,
+  limit: 10
+});
+```
+
+Every window has a `Min` and a `Max` form: `priceChange24hMin`/`Max`,
+`priceChange6hMin`/`Max`, `priceChange1hMin`/`Max`, `priceChange5mMin`/`Max`.
+
+Pool sort fields: `volume_usd_24h`, `volume_usd_7d`, `volume_usd_30d`,
+`liquidity_usd`, `txns_24h`, `created_at`, `price_usd`,
+`price_change_percentage_24h`, `price_change_percentage_6h`,
+`price_change_percentage_1h`, `price_change_percentage_5m`.
+
+#### What the token endpoint does with the same windows
+
+The 24h window is common to both search endpoints. `tokens.filter()` takes
+`priceChange24hMin`/`Max`, and `price_change_percentage_24h` is a valid token
+sort field.
+
+Only the three short windows, 6h, 1h and 5m, are pools-only, and they fail in
+two different ways on `/networks/{network}/tokens/search`. As a sort value the
+endpoint returns HTTP 400. As a filter bound it returns 200 and ignores the
+parameter, which is indistinguishable from a wide filter unless you compare the
+page against an unfiltered one. So `tokens.getTop()` and `tokens.filter()` take
+neither, rather than passing along something that silently does nothing.
+
 ### Top Tokens & Token Filtering
 
 Both are backed by `/networks/{network}/tokens/search` and return
@@ -323,6 +363,13 @@ console.log(topTokens.results.map(t => t.address));
 const filtered = await client.tokens.filter('ethereum', {
   volume24hMin: 100000,
   fdvMin: 1000000,
+  limit: 10
+});
+
+// Tokens up at least 20% on the day
+const gainers = await client.tokens.filter('ethereum', {
+  priceChange24hMin: 20,
+  sortBy: 'price_change_percentage_24h',
   limit: 10
 });
 ```
@@ -458,7 +505,13 @@ The SDK includes a comprehensive test suite to verify functionality:
 npm test
 
 # Run real-world API tests
-npx ts-node tests/test-real-world.ts
+npm run verify:real
+
+# Check the query the SDK builds for the search endpoints (offline, no network)
+npm run test:params
+
+# Hit the live search endpoints
+npm run test:endpoints
 
 # Pin the request listByDex puts on the wire, then check it against the live API
 npm run test:dex-pools
@@ -467,9 +520,18 @@ npm run test:dex-pools
 npm run test:all
 ```
 
+The runner is `tsx`. It is a devDependency, so `npm ci` is all the setup there is.
+
 All test files are located in the `tests/` directory:
 - `test-basic.ts` - Basic API functionality tests
 - `test-real-world.ts` - Tests with actual API calls and simulated failures
+- `test-search-params.ts` - Offline checks on the query parameters the SDK sends
+  to `/pools/search` and `/tokens/search`. Both endpoints answer 200 for
+  parameters they do not recognize and ignore them, so a misspelled filter bound
+  looks like a successful wide filter over the wire. These checks read the params
+  off the client before the request goes out and need neither network nor market.
+- `test-new-endpoints.ts` - The live counterpart. Every filter check compares
+  against an unfiltered baseline rather than trusting the status code.
 
 ## Support
 
