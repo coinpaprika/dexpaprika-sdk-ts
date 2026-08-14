@@ -2,6 +2,20 @@
 
 All notable changes to the DexPaprika SDK will be documented in this file.
 
+## [1.10.0] - 2026-08-14
+
+### Added
+- **Optional API key.** `new DexPaprikaClient(baseUrl, options, { apiKey })`, falling back to the `DEXPAPRIKA_API_KEY` environment variable when none is passed. Keyless remains the default and is unchanged: without a key the client sends exactly what it sent before. The key is transmitted as the **entire** `Authorization` value, with no `Bearer` prefix and no other scheme word, because the API checksums the raw header and a scheme word returns 401.
+- `resolveApiKey` is exported so callers can reuse the same precedence and validation.
+- The host is never inferred from the presence of a key. Free keys are served from the default `baseUrl` and only Pro moves to `api-pro.dexpaprika.com`, which callers pass as `baseUrl`. Sending a free key to the Pro host returns 403.
+
+### Fixed
+- **The User-Agent was pinned to `DexPaprika-SDK-JavaScript/0.1.0`** while the package shipped 1.9.0, so every request misreported which version sent it and no rollout could be measured. It is now derived from a `VERSION` constant in `src/version.ts`, with a test that fails if that constant drifts from `package.json`. `rootDir` is `./src`, so importing `package.json` directly would break the build; the test is the guard instead.
+
+### Notes
+- Reading the environment is guarded rather than assumed, so the package no longer touches `process` unconditionally and can be bundled for the browser.
+- New `npm run test:unit`, covering the bare-key format against five scheme words, keyless behaviour, precedence, whitespace trimming, rejection of keys carrying header-injection characters, and the host rules.
+
 ## 1.9.0 (2026-08-13)
 
 ### Breaking Changes

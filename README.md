@@ -135,6 +135,50 @@ const ohlcv = await client.pools.getOHLCV(
 );
 ```
 
+## Using an API key (optional)
+
+**The SDK works without a key and always will.** No signup, no card. Everything
+below is optional.
+
+A free key raises the monthly credit allowance. It does **not** raise the
+per-minute request limit, which is the same on both free tiers. Current figures
+are on the [rate limits page](https://docs.dexpaprika.com/knowledge-base/rate-limits).
+
+```ts
+import { DexPaprikaClient } from 'dexpaprika-sdk';
+
+// Explicit
+const client = new DexPaprikaClient('https://api.dexpaprika.com', {}, {
+  apiKey: 'api_your_key_here',
+});
+
+// Or leave it out and set DEXPAPRIKA_API_KEY in the environment
+const client = new DexPaprikaClient();
+```
+
+An explicit `apiKey` beats the environment variable, and no key at all keeps the
+previous keyless behaviour unchanged. In a browser bundle, where there is no
+`process`, the environment is simply empty and the client stays keyless.
+
+**There is no `Bearer` prefix.** The key is sent as the entire `Authorization`
+value, which is what the API expects; a scheme word returns 401. You never write
+the header yourself, so this only matters when debugging what went out.
+
+**Pro customers** also pass the base URL, because the host does not change on its
+own. Free keys are served from the default host and sending one to the Pro host
+returns 403, so the switch has to be deliberate:
+
+```ts
+const client = new DexPaprikaClient('https://api-pro.dexpaprika.com', {}, {
+  apiKey: 'api_your_pro_key',
+});
+```
+
+**One gotcha worth knowing.** On the data endpoints a key the API cannot read is
+ignored rather than rejected: the call returns `200` with real data and you are
+quietly served as an anonymous caller. To confirm a key is landing, call `/usage`
+and check the `plan` field; `keyless` means the key never arrived.
+
 ## Advanced Configuration
 
 The SDK supports automatic retry with exponential backoff and response caching, both enabled by default:
