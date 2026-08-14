@@ -1,6 +1,6 @@
 {
   "name": "dexpaprika-sdk",
-  "version": "1.9.0",
+  "version": "1.10.0",
   "description": "JavaScript SDK for the DexPaprika API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -17,7 +17,8 @@
     "example": "tsx examples/basic-example.ts",
     "example:cache": "tsx examples/retry-cache-example.ts",
     "verify": "tsx tests/test-retry-cache.ts",
-    "verify:real": "tsx tests/test-real-world.ts"
+    "verify:real": "tsx tests/test-real-world.ts",
+    "test:unit": "tsx tests/test-api-key.ts"
   },
   "keywords": [
     "dexpaprika",
