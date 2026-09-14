@@ -29,9 +29,10 @@ function headersFor(config: ConstructorParameters<typeof DexPaprikaClient>[2] = 
   return ((client as any).httpClient.defaults.headers ?? {}) as Record<string, any>;
 }
 
-// ── The Bearer rule ────────────────────────────────────────────────────────
-// Authorization: Bearer api_... returns 401 because the API checksums the raw
-// header value. The mistake has come back three times in four months.
+// ── The Authorization rule ─────────────────────────────────────────────────
+// The key is the entire Authorization value. Nothing goes in front of it and no
+// scheme word is ever prepended. That has been re-derived wrongly three times in
+// four months.
 
 test('the key is the entire Authorization value', () => {
   assert.equal(headersFor({ apiKey: 'api_abc123' }).Authorization, 'api_abc123');
