@@ -39,13 +39,10 @@ async function main() {
         const details = await client.pools.getDetails(pool.chain, pool.id);
         console.log(`Pool ${details.dex_name}: ${details.tokens.map(t => t.symbol).join('/')}`);
         
-        // Check price history
-        const lastWeek = new Date();
-        lastWeek.setDate(lastWeek.getDate() - 7);
-        const date = lastWeek.toISOString().split('T')[0];
-        
+        // Check price history. Keyless OHLCV reaches back 24 hours at 1h and longer.
         const history = await client.pools.getOHLCV(pool.chain, pool.id, {
-          start: date,
+          start: '-24h',
+          interval: '1h',
           limit: 3
         });
         console.log(`Got ${history.length} price points`);

@@ -71,13 +71,17 @@ export interface TransactionOptions extends PaginationOptions {
  * OHLCV data options
  */
 export interface OHLCVOptions {
-  /** Start time (ISO date string or timestamp) */
+  /**
+   * Start time: a relative offset from now such as `-24h` or `-7d`, an ISO date
+   * string, or a Unix timestamp. Must fall inside your plan's history window
+   * (24 hours without a key); otherwise the API answers 403.
+   */
   start: string;
-  /** End time (optional) */
+  /** End time (optional), same formats as `start`, e.g. `-1h` */
   end?: string;
   /** Number of data points to return */
   limit?: number;
-  /** Time interval */
+  /** Time interval. Without a key only `1h` and longer; a free key allows `10m` and longer. */
   interval?: '1m' | '5m' | '10m' | '15m' | '30m' | '1h' | '6h' | '12h' | '24h';
   /** Whether to invert the price ratio */
   inversed?: boolean;

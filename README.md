@@ -126,10 +126,9 @@ const ohlcv = await client.pools.getOHLCV(
   'ethereum',
   '0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640',
   {
-    start: '2023-01-01',
-    end: '2023-01-07',
-    limit: 7,
-    interval: '24h',
+    start: '-24h',   // last 24 hours; works without a key
+    limit: 24,
+    interval: '1h',
     inversed: false
   }
 );
@@ -282,20 +281,19 @@ const txs = await client.pools.getTransactions(
 For price charts:
 
 ```js
-// Price history (daily candles for a week)
-const startDate = new Date();
-startDate.setDate(startDate.getDate() - 7);
-
+// Price history: hourly candles for the last 24 hours
 const ohlcv = await client.pools.getOHLCV(
   'ethereum', 
   '0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640',
   {
-    start: startDate.toISOString(),
-    interval: '24h',
-    limit: 7
+    start: '-24h',
+    interval: '1h',
+    limit: 24
   }
 );
 ```
+
+`start` and `end` take a relative offset from now (`-24h`, `-7d`, `-90m`) as well as ISO dates and Unix timestamps. How far back you can go and how fine the candles can be depends on your plan: without a key, the last 24 hours at `1h` and longer; a free key opens 7 days at `10m` and longer; Dev 30 days at every interval; Pro unlimited. A request outside your plan throws an `ApiError` with status 403. Full table: [OHLCV limits by plan](https://docs.dexpaprika.com/knowledge-base/rate-limits#ohlcv-limits-by-plan).
 
 ### Tokens
 
