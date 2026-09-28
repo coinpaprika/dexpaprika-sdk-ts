@@ -147,6 +147,10 @@ export class PoolsAPI extends BaseAPI {
   
   /**
    * Get OHLCV (Open-High-Low-Close-Volume) data for a pool.
+   *
+   * History depth and candle interval depend on the plan: without a key, the last
+   * 24 hours at `1h` and longer (`start: '-24h'` selects exactly that). A request
+   * outside the plan throws an `ApiError` with status 403. See https://docs.dexpaprika.com/knowledge-base/rate-limits#ohlcv-limits-by-plan
    * 
    * @param networkId - Network identifier (e.g., 'ethereum', 'solana')
    * @param poolAddress - On-chain address of the pool

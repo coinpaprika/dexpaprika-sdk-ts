@@ -1,5 +1,5 @@
 import { DexPaprikaClient } from '../src';
-import { formatVolume, formatPair, lastWeek } from '../src/utils/helpers';
+import { formatVolume, formatPair } from '../src/utils/helpers';
 
 // Basic DexPaprika SDK usage example
 async function main() {
@@ -38,16 +38,16 @@ async function main() {
     if (poolsResp.results.length) {
       const pool = poolsResp.results[0];
       
-      // Get data for the past week
-      const weekAgo = new Date(lastWeek() * 1000).toISOString().split('T')[0];
-      console.log(`Getting price history since ${weekAgo}`);
+      // Hourly candles for the last 24 hours, which works without a key
+      console.log('Getting price history for the last 24 hours');
       
       const history = await client.pools.getOHLCV(
         pool.chain, 
         pool.id, 
         {
-          start: weekAgo,
-          limit: 7
+          start: '-24h',
+          interval: '1h',
+          limit: 24
         }
       );
       

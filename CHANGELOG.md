@@ -2,6 +2,20 @@
 
 All notable changes to the DexPaprika SDK will be documented in this file.
 
+## [1.10.1] - 2026-09-25
+
+OHLCV availability now depends on your plan. Nothing in the SDK's API surface changes; this release updates the documentation and examples so they work without a key.
+
+### API changes this release documents
+- **OHLCV history depth and candle interval are per plan since 2026-09-25.** Without a key: the last 24 hours at `1h`, `6h`, `12h` and `24h`. Free key: 7 days at `10m` and longer (`1m` and `5m` are paid). Dev: 30 days at every interval. Pro and Enterprise: unlimited. A `start` or `end` outside the window, or a finer interval than the plan allows, is answered with `403`; `getOHLCV` throws an `ApiError` whose message names the plan that lifts the limit. See [OHLCV limits by plan](https://docs.dexpaprika.com/knowledge-base/rate-limits#ohlcv-limits-by-plan).
+- **`start` and `end` accept a relative offset from now:** `-24h`, `-7d`, `-90m`, `-30s`. `start: '-24h'` selects the last 24 hours, which every plan may query. `OHLCVOptions.start` is a string, so this works in 1.10.0 too.
+- A missing or malformed `start` or `end` is answered with `400`.
+
+### Changed
+- The README examples asked for `2023-01-01` to `2023-01-07` and for a week of daily candles, both of which now return 403 without a key. They use `start: '-24h'` with hourly candles.
+- `OHLCVOptions` and `getOHLCV` doc comments describe the relative offset and the per-plan window.
+- `examples/basic-example.ts` and `tests/test-basic.ts` request the last 24 hours instead of the last week.
+
 ## [1.10.0] - 2026-08-14
 
 ### Added
