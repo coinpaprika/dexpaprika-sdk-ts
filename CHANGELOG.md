@@ -2,6 +2,16 @@
 
 All notable changes to the DexPaprika SDK will be documented in this file.
 
+## [1.11.0] - 2026-09-28
+
+Time filters on transactions and search take relative times.
+
+### Added
+- `TransactionOptions.from` and `to` accept a string as well as a number: a relative offset from now such as `'-1h'` or `'-24h'`, RFC3339 or `YYYY-MM-DD`, next to Unix seconds. `getTransactions('ethereum', pool, { from: '-1h' })` returns the last hour of trades. The API accepts these shapes since 2026-09-28.
+- `createdAfter` and `createdBefore` on `pools.filter()` and `tokens.filter()` already took a string; their documentation now lists the same shapes, so `createdAfter: '-24h'` returns what was created in the last day.
+
+Unix seconds keep working unchanged.
+
 ## [1.10.1] - 2026-09-25
 
 OHLCV availability now depends on your plan. Nothing in the SDK's API surface changes; this release updates the documentation and examples so they work without a key.
