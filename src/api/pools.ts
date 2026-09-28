@@ -1,7 +1,8 @@
 import { BaseAPI } from './base';
 import {
   PoolDetails,
-  OHLCVRecord
+  OHLCVRecord,
+  TransactionsResponse
 } from '../models/pools';
 import { PoolPaginatedResponse, PoolSearchResponse } from '../models/base';
 import {
@@ -187,13 +188,13 @@ export class PoolsAPI extends BaseAPI {
    * @param networkId - Network identifier (e.g., 'ethereum', 'solana')
    * @param poolAddress - On-chain address of the pool
    * @param options - Pagination options
-   * @returns List of pool transactions
+   * @returns Pool transactions under `transactions`, plus `page_info`
    */
   async getTxs(
     networkId: string, 
     poolAddress: string, 
     options?: TransactionOptions
-  ) {
+  ): Promise<TransactionsResponse> {
     if (!networkId) {
       throw new Error('Network ID is required');
     }
@@ -210,7 +211,7 @@ export class PoolsAPI extends BaseAPI {
     if (options?.from !== undefined) params.from = options.from;
     if (options?.to !== undefined) params.to = options.to;
 
-    return this._get(`/networks/${networkId}/pools/${poolAddress}/transactions`, params);
+    return this._get<TransactionsResponse>(`/networks/${networkId}/pools/${poolAddress}/transactions`, params);
   }
   
   /**
@@ -219,13 +220,13 @@ export class PoolsAPI extends BaseAPI {
    * @param networkId - Network identifier (e.g., 'ethereum', 'solana')
    * @param poolAddress - On-chain address of the pool
    * @param options - Pagination options
-   * @returns List of pool transactions
+   * @returns Pool transactions under `transactions`, plus `page_info`
    */
   getTransactions(
     networkId: string,
     poolAddress: string,
     options?: TransactionOptions
-  ) {
+  ): Promise<TransactionsResponse> {
     return this.getTxs(networkId, poolAddress, options);
   }
 

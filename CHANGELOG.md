@@ -2,6 +2,20 @@
 
 All notable changes to the DexPaprika SDK will be documented in this file.
 
+## [1.11.1] - 2026-09-28
+
+Pool transactions and multi-prices are typed the way the API answers.
+
+### Fixed
+- `pools.getTransactions()` and `pools.getTxs()` returned `Promise<unknown>`, so TypeScript callers needed a cast to read `.transactions`. They now return `Promise<TransactionsResponse>`: `transactions` plus `page_info`. `TransactionsResponse` no longer claims an `items` array, which the API never sent.
+- `Transaction` gains the fields the API has been returning: `created_at`, `created_at_block_hash`, `chain`, `factory_id`, `token_0_symbol`, `token_1_symbol`, `volume_0`, `volume_1`, `price_0`, `price_1`, `price_0_usd`, `price_1_usd` and `canonical_chain`. All optional. The doc comments on `amount_0` and `amount_1` note that the raw integer can exceed `Number.MAX_SAFE_INTEGER`; use `volume_0` and `volume_1` for display.
+- `TokenPrice` from `tokens.getMultiPrices()` gains `last_updated`.
+
+Nothing changes at runtime: the response bodies were already passed through whole.
+
+### Added
+- `npm run typecheck:tests` and `npm run test:types`, both run in CI. They compile and run `tests/test-transactions-type.ts` against recorded responses, so a return type that slides back to `unknown` fails the build.
+
 ## [1.11.0] - 2026-09-28
 
 Time filters on transactions and search take relative times.

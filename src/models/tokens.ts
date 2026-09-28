@@ -188,4 +188,6 @@ export interface TokenPrice {
   chain: string;
   id: string;
   price_usd?: number;
+  /** When the price was last updated, RFC3339 in UTC (e.g. "2026-09-28T13:06:30Z"). */
+  last_updated?: string;
 } 
