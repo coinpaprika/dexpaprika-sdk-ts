@@ -268,11 +268,13 @@ const poolDetails = await client.pools.getDetails(
   '0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640'
 );
 
-// Transactions
+// Transactions from the last hour. `from` and `to` also take Unix seconds,
+// RFC3339 or YYYY-MM-DD; the same shapes work for createdAfter / createdBefore
+// on pools.filter() and tokens.filter().
 const txs = await client.pools.getTransactions(
   'ethereum',
   '0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640',
-  { limit: 20 }
+  { limit: 20, from: '-1h' }
 );
 ```
 

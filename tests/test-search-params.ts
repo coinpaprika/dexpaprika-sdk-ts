@@ -197,6 +197,31 @@ async function main() {
     assertEqual(mapTokenSortField('price_usd'), 'volume_usd_24h', "mapTokenSortField('price_usd')");
   });
 
+  await test('pools.filter passes a relative createdAfter through unchanged', async () => {
+    const client = new RecordingClient();
+    const pools = new PoolsAPI(client);
+    await pools.filter('ethereum', { createdAfter: '-24h', createdBefore: 1790000000 });
+    assertEqual(client.lastParams().created_after, '-24h', 'params.created_after');
+    assertEqual(client.lastParams().created_before, 1790000000, 'params.created_before');
+  });
+
+  await test('tokens.filter passes a relative createdBefore through unchanged', async () => {
+    const client = new RecordingClient();
+    const tokens = new TokensAPI(client);
+    await tokens.filter('ethereum', { createdAfter: '-7d', createdBefore: '-1h' });
+    assertEqual(client.lastParams().created_after, '-7d', 'params.created_after');
+    assertEqual(client.lastParams().created_before, '-1h', 'params.created_before');
+  });
+
+  await test('pools.getTransactions sends relative and numeric from/to as given', async () => {
+    const client = new RecordingClient();
+    const pools = new PoolsAPI(client);
+    await pools.getTransactions('ethereum', '0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640', { from: '-1h', to: 1790000000 });
+    assertEqual(client.lastEndpoint(), '/networks/ethereum/pools/0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640/transactions', 'endpoint');
+    assertEqual(client.lastParams().from, '-1h', 'params.from');
+    assertEqual(client.lastParams().to, 1790000000, 'params.to');
+  });
+
   console.log(`\n${'='.repeat(50)}`);
   console.log(`RESULTS: ${passed} passed, ${failed} failed out of ${passed + failed} tests`);
   console.log(`${'='.repeat(50)}`);

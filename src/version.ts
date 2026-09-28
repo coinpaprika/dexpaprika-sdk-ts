@@ -6,7 +6,7 @@
  * matches package.json, which is the guard that was missing: the User-Agent was
  * pinned to 0.1.0 while the package shipped 1.9.0.
  */
-export const VERSION = '1.10.1';
+export const VERSION = '1.11.0';
 
 /** Environment variable consulted when no key is passed to the constructor. */
 export const API_KEY_ENV_VAR = 'DEXPAPRIKA_API_KEY';

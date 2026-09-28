@@ -61,10 +61,13 @@ export interface PoolDetailsOptions {
 export interface TransactionOptions extends PaginationOptions {
   /** Cursor for paginated results */
   cursor?: string;
-  /** Filter transactions starting from this UNIX timestamp (inclusive). Results capped to last 7 days. */
-  from?: number;
-  /** Filter transactions up to this UNIX timestamp (exclusive). Must be after `from`. */
-  to?: number;
+  /**
+   * Filter transactions starting from this time (inclusive): a relative offset from now such as
+   * '-1h' or '-24h', Unix seconds, RFC3339 or YYYY-MM-DD. Results capped to last 7 days.
+   */
+  from?: number | string;
+  /** Filter transactions up to this time (exclusive), same formats as `from`. Must be after `from`. */
+  to?: number | string;
 }
 
 /**
@@ -136,9 +139,9 @@ export interface PoolFilterOptions {
   priceChange5mMin?: number;
   /** Maximum 5m price change, in percent */
   priceChange5mMax?: number;
-  /** Only pools created after this Unix timestamp */
+  /** Only pools created at or after this time: a relative offset from now such as '-24h' or '-7d', Unix seconds, RFC3339 or YYYY-MM-DD */
   createdAfter?: number | string;
-  /** Only pools created before this Unix timestamp */
+  /** Only pools created at or before this time, same formats as `createdAfter` */
   createdBefore?: number | string;
 }
 
@@ -192,8 +195,8 @@ export interface TokenFilterOptions {
   priceChange24hMin?: number;
   /** Maximum 24h price change, in percent */
   priceChange24hMax?: number;
-  /** Only tokens created after this Unix timestamp */
+  /** Only tokens created at or after this time: a relative offset from now such as '-24h' or '-7d', Unix seconds, RFC3339 or YYYY-MM-DD */
   createdAfter?: number | string;
-  /** Only tokens created before this Unix timestamp */
+  /** Only tokens created at or before this time, same formats as `createdAfter` */
   createdBefore?: number | string;
 } 
