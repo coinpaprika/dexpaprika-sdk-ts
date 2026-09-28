@@ -1,4 +1,4 @@
-import { PaginatedResponse, PoolPaginatedResponse } from './base';
+import { PageInfo, PoolPaginatedResponse } from './base';
 import { TokenSummary } from './tokens';
 
 // basic token info
@@ -198,12 +198,15 @@ export interface Transaction {
   token_1: string;
   
   /**
-   * Amount of first token.
+   * Amount of first token in its smallest unit, signed. The API sends a JSON
+   * integer that can exceed Number.MAX_SAFE_INTEGER, so the parsed value may be
+   * rounded. Use volume_0 for display.
    */
   amount_0: string | number;
   
   /**
-   * Amount of second token.
+   * Amount of second token in its smallest unit, signed. Same precision caveat
+   * as amount_0; use volume_1 for display.
    */
   amount_1: string | number;
   
@@ -211,14 +214,84 @@ export interface Transaction {
    * Block number of the transaction.
    */
   created_at_block_number: number;
+
+  /**
+   * Hash of the block the transaction is in.
+   */
+  created_at_block_hash?: string;
+
+  /**
+   * When the transaction happened, RFC3339 in UTC (e.g. "2026-09-28T13:07:11Z").
+   */
+  created_at?: string;
+
+  /**
+   * Network identifier (e.g. "ethereum").
+   */
+  chain?: string;
+
+  /**
+   * Factory contract that created the pool.
+   */
+  factory_id?: string;
+
+  /**
+   * Symbol of the first token (e.g. "WETH").
+   */
+  token_0_symbol?: string;
+
+  /**
+   * Symbol of the second token (e.g. "USDC").
+   */
+  token_1_symbol?: string;
+
+  /**
+   * Amount of first token, decimal-adjusted and unsigned.
+   */
+  volume_0?: number;
+
+  /**
+   * Amount of second token, decimal-adjusted and unsigned.
+   */
+  volume_1?: number;
+
+  /**
+   * Price of the first token in units of the second.
+   */
+  price_0?: number;
+
+  /**
+   * Price of the second token in units of the first.
+   */
+  price_1?: number;
+
+  /**
+   * Price of the first token in USD.
+   */
+  price_0_usd?: number;
+
+  /**
+   * Price of the second token in USD.
+   */
+  price_1_usd?: number;
+
+  /**
+   * Whether the block is on the canonical chain.
+   */
+  canonical_chain?: boolean;
 }
 
 /**
- * Response containing a list of transactions.
+ * Response of the pool transactions endpoint.
  */
-export interface TransactionsResponse extends PaginatedResponse<Transaction> {
+export interface TransactionsResponse {
   /**
-   * List of transactions.
+   * List of transactions, newest first.
    */
   transactions: Transaction[];
+
+  /**
+   * Page-based pagination details.
+   */
+  page_info: PageInfo;
 } 

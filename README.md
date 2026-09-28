@@ -276,6 +276,8 @@ const txs = await client.pools.getTransactions(
   '0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640',
   { limit: 20, from: '-1h' }
 );
+// Each row carries created_at, token symbols, volumes and USD prices
+console.log(txs.transactions[0]?.created_at, txs.transactions[0]?.price_0_usd);
 ```
 
 ### OHLCV Data

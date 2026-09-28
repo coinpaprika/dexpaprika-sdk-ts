@@ -30,3 +30,9 @@ jobs:
 
       - name: Type check + build
         run: npm run build
+
+      - name: Type check test fixtures
+        run: npm run typecheck:tests
+
+      - name: Response type tests
+        run: npm run test:types
