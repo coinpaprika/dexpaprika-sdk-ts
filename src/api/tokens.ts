@@ -4,8 +4,9 @@ import {
   TokenSearchResponse,
   TokenPrice,
 } from '../models/tokens';
+import { OHLCVRecord } from '../models/pools';
 import { PoolSearchResponse } from '../models/base';
-import { TokenPoolsOptions, TopTokensOptions, TokenFilterOptions } from '../models/options';
+import { TokenPoolsOptions, TopTokensOptions, TokenFilterOptions, TokenOHLCVOptions } from '../models/options';
 import { mapTokenSortField, mapPoolSortField, mapTokenFilterParams } from '../utils/searchParams';
 
 /**
@@ -137,6 +138,47 @@ export class TokensAPI extends BaseAPI {
     Object.assign(params, mapTokenFilterParams(filters));
 
     return this._get<TokenSearchResponse>(`/networks/${networkId}/tokens/search`, params);
+  }
+
+  /**
+   * Get OHLCV (Open-High-Low-Close-Volume) data for a token: USD candles built
+   * from a volume-weighted price across every pool the token trades in on the
+   * network, with volume summed the same way. Same record shape as
+   * `pools.getOHLCV()`, and there is no `inversed` option here (see
+   * {@link TokenOHLCVOptions}).
+   *
+   * Requires a Dev, Pro or Enterprise plan, and must be called against
+   * `api-pro.dexpaprika.com` with the key as the whole `Authorization` value
+   * (no scheme word in front of it) -- see "Using an API key" in the README.
+   * Keyless and free keys get HTTP 403; this method surfaces the API's message
+   * on the thrown `ApiError`. Dev history is limited to the last 30 days.
+   *
+   * @param networkId - Network identifier (e.g., 'ethereum', 'solana')
+   * @param tokenAddress - On-chain address of the token
+   * @param options - OHLCV options including time range and interval
+   * @returns Time-series OHLCV data
+   */
+  async getOHLCV(
+    networkId: string,
+    tokenAddress: string,
+    options: TokenOHLCVOptions
+  ): Promise<OHLCVRecord[]> {
+    if (!networkId) {
+      throw new Error('Network ID is required');
+    }
+    if (!tokenAddress) {
+      throw new Error('Token address is required');
+    }
+
+    const params: Record<string, any> = {
+      start: options.start,
+      limit: options.limit ?? 10,
+      interval: options.interval ?? '24h'
+    };
+
+    if (options.end) params.end = options.end;
+
+    return this._get<OHLCVRecord[]>(`/networks/${networkId}/tokens/${tokenAddress}/ohlcv`, params);
   }
 
   /**

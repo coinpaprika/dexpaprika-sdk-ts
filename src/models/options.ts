@@ -91,6 +91,28 @@ export interface OHLCVOptions {
 }
 
 /**
+ * Token OHLCV data options.
+ *
+ * There is no `inversed` field here, unlike {@link OHLCVOptions}: a pool candle
+ * is a ratio between two tokens that can be flipped, but a token candle is
+ * already a single USD price series, so there is nothing to invert.
+ */
+export interface TokenOHLCVOptions {
+  /**
+   * Start time: a relative offset from now such as `-24h` or `-7d`, RFC3339,
+   * `YYYY-MM-DD`, or Unix seconds. Must fall inside your plan's history window;
+   * otherwise the API answers 403.
+   */
+  start: string;
+  /** End time (optional), same formats as `start`. */
+  end?: string;
+  /** Number of data points to return (1-1000). */
+  limit?: number;
+  /** Candle interval. */
+  interval?: '1m' | '5m' | '10m' | '15m' | '30m' | '1h' | '6h' | '12h' | '24h';
+}
+
+/**
  * Options for pool filtering endpoint
  */
 export interface PoolFilterOptions {

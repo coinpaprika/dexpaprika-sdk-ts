@@ -2,6 +2,12 @@
 
 All notable changes to the DexPaprika SDK will be documented in this file.
 
+## [1.12.0] - 2026-09-29
+
+### Added
+- `tokens.getOHLCV(networkId, tokenAddress, options)`: OHLCV candles for a token, priced in USD from a volume-weighted price across every pool the token trades in on the network, with volume summed the same way. Same record shape as `pools.getOHLCV()` (`OHLCVRecord`, reused as-is). `TokenOHLCVOptions` takes `start` (required), `end`, `limit` and `interval`, the same shapes as `pools.getOHLCV()`, but has no `inversed` field: a token candle is a single USD price series, not a ratio between two tokens, so there is nothing to invert.
+- This endpoint requires a Dev, Pro or Enterprise plan and must be called against `api-pro.dexpaprika.com` with the key as the whole `Authorization` value; keyless and free keys get HTTP 403, and `tokens.getOHLCV()` surfaces the API's own message on the thrown `ApiError`, the same as the rest of the SDK's error handling. Dev history is limited to the last 30 days. See "Token OHLCV Data" in the README.
+
 ## [1.11.1] - 2026-09-28
 
 Pool transactions and multi-prices are typed the way the API answers.

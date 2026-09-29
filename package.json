@@ -1,6 +1,6 @@
 {
   "name": "dexpaprika-sdk",
-  "version": "1.11.1",
+  "version": "1.12.0",
   "description": "JavaScript SDK for the DexPaprika API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -13,7 +13,8 @@
     "test:params": "tsx tests/test-search-params.ts",
     "test:endpoints": "tsx tests/test-new-endpoints.ts",
     "test:dex-pools": "tsx tests/test-dex-pools.ts",
-    "test:all": "npm test && npm run verify && npm run verify:real && tsx tests/test-token-summary.ts && npm run test:migration && npm run test:params && npm run test:endpoints && npm run test:dex-pools",
+    "test:token-ohlcv": "tsx tests/test-token-ohlcv.ts",
+    "test:all": "npm test && npm run verify && npm run verify:real && tsx tests/test-token-summary.ts && npm run test:migration && npm run test:params && npm run test:endpoints && npm run test:dex-pools && npm run test:token-ohlcv",
     "example": "tsx examples/basic-example.ts",
     "example:cache": "tsx examples/retry-cache-example.ts",
     "verify": "tsx tests/test-retry-cache.ts",

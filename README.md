@@ -299,6 +299,39 @@ const ohlcv = await client.pools.getOHLCV(
 
 `start` and `end` take a relative offset from now (`-24h`, `-7d`, `-90m`) as well as ISO dates and Unix timestamps. How far back you can go and how fine the candles can be depends on your plan: without a key, the last 24 hours at `1h` and longer; a free key opens 7 days at `10m` and longer; Dev 30 days at every interval; Pro unlimited. A request outside your plan throws an `ApiError` with status 403. Full table: [OHLCV limits by plan](https://docs.dexpaprika.com/knowledge-base/rate-limits#ohlcv-limits-by-plan).
 
+### Token OHLCV Data
+
+`tokens.getOHLCV()` returns the same kind of candle as `pools.getOHLCV()`, but
+for a token rather than a single pool: USD open/high/low/close built from a
+volume-weighted price across every pool the token trades in on the network,
+with volume summed the same way. This endpoint needs a Dev or Pro plan, and
+requests go to `api-pro.dexpaprika.com` with the key as the whole
+`Authorization` value, not the default host. See "Using an API key" above for
+how to point the client at that host, and
+[the pricing page](https://dexpaprika.com/api/pricing) for current plan
+details. Keyless and free keys get an `ApiError` with status 403.
+
+```js
+const client = new DexPaprikaClient('https://api-pro.dexpaprika.com', {}, {
+  apiKey: 'api_your_dev_or_pro_key',
+});
+
+const tokenOhlcv = await client.tokens.getOHLCV(
+  'ethereum',
+  '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', // WETH
+  {
+    start: '-24h',
+    interval: '1h',
+    limit: 24
+  }
+);
+```
+
+There is no `inversed` option on this endpoint, unlike `pools.getOHLCV()`: a
+token candle is already a single USD price series, so there is nothing to
+invert. Full reference:
+[Get OHLCV data for a token](https://docs.dexpaprika.com/api-reference/tokens/get-ohlcv-data-for-a-token).
+
 ### Tokens
 
 ```js
