@@ -150,7 +150,7 @@ export class TokensAPI extends BaseAPI {
    *
    * Requires a Dev, Pro or Enterprise plan, and must be called against
    * `api-pro.dexpaprika.com` with the key as the whole `Authorization` value
-   * (no scheme word in front of it). See "Using an API key" in the README.
+   * (nothing in front of it). See "Using an API key" in the README.
    * Keyless and free keys get HTTP 403; this method surfaces the API's message
    * on the thrown `ApiError`. Dev history is limited to the last 30 days.
    *

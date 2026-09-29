@@ -22,11 +22,10 @@ export interface ClientConfig {
    *
    * Keyless is the default and keeps working: without a key the client behaves
    * exactly as before. The key is sent as the **entire** `Authorization` value,
-   * with no `Bearer` prefix and no other scheme word, because the API checksums
-   * the raw header and a scheme word returns 401.
+   * with nothing in front of it.
    *
    * The host does not change when a key is present. Free keys are served from
-   * the default `baseUrl` and only Pro moves to `api-pro.dexpaprika.com`, which
+   * the default `baseUrl`; Dev and Pro keys call `api-pro.dexpaprika.com`, which
    * callers pass as `baseUrl`.
    */
   apiKey?: string;
@@ -97,7 +96,7 @@ export class DexPaprikaClient {
         // Was pinned to 0.1.0 while the package shipped 1.9.0, so every request
         // misreported which SDK sent it and no rollout could be measured.
         'User-Agent': `DexPaprika-SDK-JavaScript/${VERSION}`,
-        // The whole value, with no scheme word in front of it. Spread last so a
+        // The whole value, with nothing in front of it. Spread last so a
         // caller can still override anything here.
         ...(apiKey ? { Authorization: apiKey } : {}),
         ...options.headers,
