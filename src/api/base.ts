@@ -48,9 +48,7 @@ export class BaseAPI {
           bodyIsObject && typeof data.replacement === 'string' && data.replacement.trim() !== ''
             ? data.replacement
             : undefined;
-        const apiMessage: string | undefined = bodyIsObject
-          ? (data.error || data.message)
-          : undefined;
+        const apiMessage: string | undefined = bodyIsObject ? errorText(data) : undefined;
         const message = apiMessage || 'Unknown API error';
 
         // Generic, self-documenting deprecation handling: ANY non-2xx whose
@@ -118,3 +116,18 @@ export class BaseAPI {
     return this.client.post<T>(endpoint, data, params);
   }
 } 
+
+/**
+ * The human-readable message in an error body. The API sends `{"message": "..."}`
+ * or `{"error": "..."}`; the edge in front of it answers 5xx with
+ * `{"success": false, "error": {"code": "...", "message": "..."}}`, where
+ * `error` is an object and printing it directly gives "[object Object]".
+ */
+function errorText(data: any): string | undefined {
+  if (typeof data.error === 'string' && data.error !== '') return data.error;
+  if (data.error && typeof data.error === 'object' && typeof data.error.message === 'string') {
+    return data.error.message;
+  }
+  if (typeof data.message === 'string' && data.message !== '') return data.message;
+  return undefined;
+}

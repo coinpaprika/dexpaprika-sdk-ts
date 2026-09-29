@@ -1,4 +1,5 @@
 import { BaseAPI } from './base';
+import { withVolume } from '../utils/ohlcv';
 import {
   PoolDetails,
   OHLCVRecord,
@@ -179,7 +180,8 @@ export class PoolsAPI extends BaseAPI {
     if (options.end) params.end = options.end;
     if (options.inversed) params.inversed = 'true';
     
-    return this._get<OHLCVRecord[]>(`/networks/${networkId}/pools/${poolAddress}/ohlcv`, params);
+    const rows = await this._get<OHLCVRecord[]>(`/networks/${networkId}/pools/${poolAddress}/ohlcv`, params);
+    return withVolume(rows);
   }
   
   /**
