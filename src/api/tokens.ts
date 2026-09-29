@@ -1,4 +1,5 @@
 import { BaseAPI } from './base';
+import { withVolume } from '../utils/ohlcv';
 import {
   TokenDetails,
   TokenSearchResponse,
@@ -178,7 +179,8 @@ export class TokensAPI extends BaseAPI {
 
     if (options.end) params.end = options.end;
 
-    return this._get<OHLCVRecord[]>(`/networks/${networkId}/tokens/${tokenAddress}/ohlcv`, params);
+    const rows = await this._get<OHLCVRecord[]>(`/networks/${networkId}/tokens/${tokenAddress}/ohlcv`, params);
+    return withVolume(rows);
   }
 
   /**

@@ -2,6 +2,12 @@
 
 All notable changes to the DexPaprika SDK will be documented in this file.
 
+## [1.12.1] - 2026-09-29
+
+### Fixed
+- `pools.getOHLCV()` and `tokens.getOHLCV()` return `volume: 0` for a candle the API sent without `volume`. The API leaves the field out when a candle's USD volume rounds down to 0, which happens on quiet minutes even for large tokens, so a record typed `volume: number` arrived with `volume` undefined.
+- A 5xx answered by the edge in front of the API carries `{"error": {"code", "message"}}`. `ApiError` now shows that message instead of `API Error (500): [object Object]`.
+
 ## [1.12.0] - 2026-09-29
 
 ### Added

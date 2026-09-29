@@ -172,6 +172,41 @@ async function main() {
     }
   });
 
+  await test('a 5xx edge body shows its message, not [object Object]', async () => {
+    // Captured from api-pro on 2026-09-29 for an unknown token address.
+    const client = new FailingClient(500, {
+      success: false,
+      error: { code: 'ORIGIN_ERROR', message: 'Upstream service failed to respond successfully.' },
+    });
+    const tokens = new TokensAPI(client);
+    try {
+      await tokens.getOHLCV('ethereum', '0x0000000000000000000000000000000000000001', { start: '-24h' });
+      throw new Error('expected getOHLCV to throw');
+    } catch (err: any) {
+      if (!(err instanceof ApiError)) {
+        throw new Error(`expected an ApiError, got ${err.constructor?.name}: ${err.message}`);
+      }
+      assertEqual(err.message, 'API Error (500): Upstream service failed to respond successfully.', 'err.message');
+    }
+  });
+
+  await test('a candle without volume comes back with volume 0', async () => {
+    // A real 1m UNI candle from api-pro on 2026-09-29: USD volume under $1,
+    // so the API left the field out (coinpaprika/dexpaprika-go#2430).
+    class ReturningClient extends DexPaprikaClient {
+      async get<T>(): Promise<T> {
+        return [
+          { time_open: '2026-09-29T09:12:00Z', time_close: '2026-09-29T09:13:00Z', open: 8.97, high: 8.98, low: 8.97, close: 8.98, volume: 152 },
+          { time_open: '2026-09-29T09:13:00Z', time_close: '2026-09-29T09:14:00Z', open: 8.977335891233913, high: 8.977335891233913, low: 8.977335891233913, close: 8.977335891233913 },
+        ] as unknown as T;
+      }
+    }
+    const tokens = new TokensAPI(new ReturningClient());
+    const rows = await tokens.getOHLCV('ethereum', '0x1f9840a85d5af5bf1d1762f925bdaddc4201f984', { start: '-2h', interval: '1m' });
+    assertEqual(rows[0].volume, 152, 'rows[0].volume');
+    assertEqual(rows[1].volume, 0, 'rows[1].volume');
+  });
+
   console.log(`\n${'='.repeat(50)}`);
   console.log(`RESULTS: ${passed} passed, ${failed} failed out of ${passed + failed} tests`);
   console.log(`${'='.repeat(50)}`);
