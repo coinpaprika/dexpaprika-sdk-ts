@@ -172,7 +172,7 @@ export class PoolsAPI extends BaseAPI {
     
     const params: Record<string, any> = { 
       start: options.start,
-      limit: options.limit ?? 1,
+      limit: options.limit ?? 10,
       interval: options.interval ?? '24h'
     };
     
