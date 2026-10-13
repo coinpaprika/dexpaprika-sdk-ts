@@ -332,6 +332,63 @@ token candle is already a single USD price series, so there is nothing to
 invert. Full reference:
 [Get OHLCV data for a token](https://docs.dexpaprika.com/api-reference/tokens/get-ohlcv-data-for-a-token).
 
+### Technical Indicators
+
+`pools.getIndicator()` and `tokens.getIndicator()` compute `rsi`, `ema`,
+`macd`, `bbands` or `vwap` server-side from OHLCV candles. Only `indicator` is
+required; every other option is left out of the request unless you set it, so
+the API's own defaults apply (they come back on the response's `parameters`).
+Sending a parameter the chosen indicator does not use, such as `fast_period`
+with `indicator: 'rsi'`, is refused with HTTP 400.
+
+```js
+// RSI on a pool, keyless
+const rsi = await client.pools.getIndicator(
+  'ethereum',
+  '0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640',
+  {
+    indicator: 'rsi',
+    interval: '1h',
+    start: '-6h',
+  }
+);
+console.log(rsi.data[0].timestamp, rsi.data[0].value);
+
+// macd reports macd/signal/histogram per point instead of value
+const macd = await client.pools.getIndicator(
+  'ethereum',
+  '0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640',
+  { indicator: 'macd', interval: '1h', start: '-6h', fast_period: 12, slow_period: 26, signal_period: 9 }
+);
+console.log(macd.data[0].macd, macd.data[0].signal, macd.data[0].histogram);
+```
+
+Pool indicators are available on every plan, with the same `interval` and
+history limits as `pools.getOHLCV()`. Token indicators need a Dev, Pro or
+Enterprise key: `tokens.getIndicator()` on a keyless or free call throws an
+`ApiError` with status 403 and `requiredTier` set (see
+[Error Handling](#error-handling)).
+
+```js
+const client = new DexPaprikaClient('https://api-pro.dexpaprika.com', {}, {
+  apiKey: 'api_your_dev_or_pro_key',
+});
+
+const tokenRsi = await client.tokens.getIndicator(
+  'ethereum',
+  '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', // WETH
+  { indicator: 'rsi', interval: '1h', start: '-6h' }
+);
+```
+
+Current interval and history limits by plan, and current pricing, move: read
+them from [the rate limits page](https://docs.dexpaprika.com/knowledge-base/rate-limits)
+and [the pricing page](https://dexpaprika.com/api/pricing) rather than from
+this README. Get a free key at [console.dexpaprika.com](https://console.dexpaprika.com).
+Full reference: [Get a technical indicator for a pool](https://docs.dexpaprika.com/api-reference/pools/get-a-technical-indicator-for-a-pool),
+[Get a technical indicator for a token](https://docs.dexpaprika.com/api-reference/tokens/get-a-technical-indicator-for-a-token),
+and the [technical indicators tutorial](https://docs.dexpaprika.com/tutorials/technical-indicators).
+
 ### Tokens
 
 ```js
@@ -511,6 +568,21 @@ try {
 }
 ```
 
+`ApiError` also carries `errorCode`, `param` and `requiredTier` when the API's
+error envelope sent them (`{"error": "<code>", "message": "...", "param": "...",
+"required_tier": "..."}`), so you can branch on them instead of parsing
+`error.message`:
+
+```js
+try {
+  await client.tokens.getIndicator('ethereum', wethAddress, { indicator: 'rsi', start: '-6h' });
+} catch (error) {
+  if (error instanceof ApiError && error.errorCode === 'plan_required') {
+    console.log(`Needs a ${error.requiredTier} plan or higher`);
+  }
+}
+```
+
 Using the error helper:
 
 ```js
@@ -595,6 +667,9 @@ npm run test:endpoints
 # Pin the request listByDex puts on the wire, then check it against the live API
 npm run test:dex-pools
 
+# Check the query pools.getIndicator()/tokens.getIndicator() build, and their error handling (offline, no network)
+npm run test:indicators
+
 # Run all tests sequentially
 npm run test:all
 ```
@@ -611,6 +686,10 @@ All test files are located in the `tests/` directory:
   off the client before the request goes out and need neither network nor market.
 - `test-new-endpoints.ts` - The live counterpart. Every filter check compares
   against an unfiltered baseline rather than trusting the status code.
+- `test-indicators.ts` - Offline checks for `pools.getIndicator()` and
+  `tokens.getIndicator()`: the query built per indicator, that only the
+  options the caller set are sent, rsi/macd response parsing, and that a 403
+  `plan_required` body surfaces cleanly on `ApiError` with `requiredTier` set.
 
 ## Support
 

@@ -12,6 +12,7 @@ export { DexesAPI } from './api/dexes';
 // Model exports
 export * from './models/base';
 export * from './models/dexes';
+export * from './models/indicators';
 export * from './models/networks';
 export * from './models/pools';
 export * from './models/search';

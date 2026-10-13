@@ -33,15 +33,38 @@ export class PoolNotFoundError extends DexPaprikaError {
 }
 
 /**
+ * Extra fields the API's error envelope may carry, surfaced on {@link ApiError}
+ * when present: `{"error": "<code>", "message": "...", "param": "...",
+ * "required_tier": "..."}`.
+ */
+export interface ApiErrorDetails {
+  /** The `error` code from the API's envelope (e.g. "plan_required", "not_found", "invalid_param"). */
+  errorCode?: string;
+  /** The plan that would be required, sent on a 403 `plan_required` response (e.g. "dev"). */
+  requiredTier?: string;
+  /** The query parameter the error refers to, when the API sent one. */
+  param?: string;
+}
+
+/**
  * General API error with status code
  */
 export class ApiError extends DexPaprikaError {
   public statusCode: number;
-  
-  constructor(message: string, statusCode: number) {
+  /** The `error` code from the API's envelope, when present. */
+  public errorCode?: string;
+  /** The plan required for this request, when the API sent one (403 `plan_required`). */
+  public requiredTier?: string;
+  /** The query parameter the error refers to, when the API sent one. */
+  public param?: string;
+
+  constructor(message: string, statusCode: number, details: ApiErrorDetails = {}) {
     super(`API Error (${statusCode}): ${message}`);
     this.statusCode = statusCode;
     this.name = 'ApiError';
+    this.errorCode = details.errorCode;
+    this.requiredTier = details.requiredTier;
+    this.param = details.param;
   }
 }
 

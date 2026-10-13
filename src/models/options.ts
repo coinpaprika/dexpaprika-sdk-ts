@@ -2,6 +2,8 @@
  * Common option types for API requests
  */
 
+import { IndicatorInterval, IndicatorType } from './indicators';
+
 /**
  * Basic pagination options
  */
@@ -221,4 +223,47 @@ export interface TokenFilterOptions {
   createdAfter?: number | string;
   /** Only tokens created at or before this time, same formats as `createdAfter` */
   createdBefore?: number | string;
-} 
+}
+
+/**
+ * Options for the pool and token technical indicator endpoints
+ * (`pools.getIndicator()` and `tokens.getIndicator()`).
+ *
+ * Only `indicator` is required. Every other field is left unset by default,
+ * on purpose: the API fills in its own defaults (reported back on the
+ * response's `parameters`), and a value sent for the wrong indicator is
+ * refused with HTTP 400, e.g. `fast_period` with `indicator: 'rsi'`.
+ */
+export interface IndicatorOptions {
+  /** Which indicator to compute: `rsi`, `ema`, `macd`, `bbands` or `vwap`. */
+  indicator: IndicatorType;
+  /**
+   * Candle interval. Leave unset to use the server's default (`24h`, or `1h`
+   * for keyless callers on pool indicators); do not hard-code a default here.
+   */
+  interval?: IndicatorInterval;
+  /** Number of data points to return (1-1000, server default 100). */
+  limit?: number;
+  /**
+   * Start time: a relative offset from now such as `-24h` or `-7d`, Unix
+   * seconds, RFC3339, or `YYYY-MM-DD`.
+   */
+  start?: string;
+  /** End time (exclusive), same formats as `start`. Server default: now. */
+  end?: string;
+  /** Cursor from a previous response's `next_cursor`. Do not combine with `start`. */
+  cursor?: string;
+  /**
+   * Lookback period. Accepted by rsi (default 14), ema (default 20), bbands
+   * (default 20) and vwap (default 14); macd does not accept it.
+   */
+  period?: number;
+  /** macd only, default 12. */
+  fast_period?: number;
+  /** macd only, default 26, must be greater than `fast_period`. */
+  slow_period?: number;
+  /** macd only, default 9. */
+  signal_period?: number;
+  /** bbands only, default 2. Greater than 0 and at most 10. */
+  std_dev?: number;
+}

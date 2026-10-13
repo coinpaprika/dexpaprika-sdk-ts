@@ -51,6 +51,19 @@ export class BaseAPI {
         const apiMessage: string | undefined = bodyIsObject ? errorText(data) : undefined;
         const message = apiMessage || 'Unknown API error';
 
+        // Structured fields from the API's error envelope
+        // (`{"error": "<code>", "message": "...", "param": "...", "required_tier": "..."}`),
+        // surfaced on ApiError below so a caller can branch on them instead of
+        // parsing the message text.
+        const errorCode: string | undefined =
+          bodyIsObject && typeof data.error === 'string' && data.error !== '' ? data.error : undefined;
+        const requiredTier: string | undefined =
+          bodyIsObject && typeof data.required_tier === 'string' && data.required_tier !== ''
+            ? data.required_tier
+            : undefined;
+        const param: string | undefined =
+          bodyIsObject && typeof data.param === 'string' && data.param !== '' ? data.param : undefined;
+
         // Generic, self-documenting deprecation handling: ANY non-2xx whose
         // body carries a "replacement" hint is surfaced as a
         // DeprecatedEndpointError that includes both the API's message and the
@@ -92,7 +105,7 @@ export class BaseAPI {
           }
         }
         
-        throw new ApiError(message, status);
+        throw new ApiError(message, status, { errorCode, requiredTier, param });
       }
       
       // Handle network/connection errors
@@ -118,16 +131,19 @@ export class BaseAPI {
 } 
 
 /**
- * The human-readable message in an error body. The API sends `{"message": "..."}`
- * or `{"error": "..."}`; the edge in front of it answers 5xx with
+ * The human-readable message in an error body. The error envelope used across
+ * the API (`{"error": "<code>", "message": "<human text>", ...}`) puts the
+ * short machine code in `error` and the readable sentence in `message`, so
+ * `message` is preferred when both are present. Some bodies carry only one of
+ * the two, and the edge in front of the API answers 5xx with
  * `{"success": false, "error": {"code": "...", "message": "..."}}`, where
  * `error` is an object and printing it directly gives "[object Object]".
  */
 function errorText(data: any): string | undefined {
+  if (typeof data.message === 'string' && data.message !== '') return data.message;
   if (typeof data.error === 'string' && data.error !== '') return data.error;
   if (data.error && typeof data.error === 'object' && typeof data.error.message === 'string') {
     return data.error.message;
   }
-  if (typeof data.message === 'string' && data.message !== '') return data.message;
   return undefined;
 }

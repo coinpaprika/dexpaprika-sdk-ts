@@ -1,13 +1,21 @@
 import { BaseAPI } from './base';
 import { withVolume } from '../utils/ohlcv';
+import { buildIndicatorParams } from '../utils/indicators';
 import {
   TokenDetails,
   TokenSearchResponse,
   TokenPrice,
 } from '../models/tokens';
 import { OHLCVRecord } from '../models/pools';
+import { TokenIndicatorResponse } from '../models/indicators';
 import { PoolSearchResponse } from '../models/base';
-import { TokenPoolsOptions, TopTokensOptions, TokenFilterOptions, TokenOHLCVOptions } from '../models/options';
+import {
+  TokenPoolsOptions,
+  TopTokensOptions,
+  TokenFilterOptions,
+  TokenOHLCVOptions,
+  IndicatorOptions,
+} from '../models/options';
 import { mapTokenSortField, mapPoolSortField, mapTokenFilterParams } from '../utils/searchParams';
 
 /**
@@ -203,5 +211,52 @@ export class TokensAPI extends BaseAPI {
 
     const params = { tokens: tokens.join(',') };
     return this._get<TokenPrice[]>(`/networks/${networkId}/multi/prices`, params);
+  }
+
+  /**
+   * Get a technical indicator for a token: `rsi`, `ema`, `macd`, `bbands` or
+   * `vwap`, computed server-side from the token's OHLCV candles.
+   *
+   * Requires a Dev, Pro or Enterprise plan, and must be called against
+   * `api-pro.dexpaprika.com` with the key as the whole `Authorization` value
+   * (nothing in front of it). See "Using an API key" in the README. Keyless
+   * and free keys get HTTP 403 `plan_required`; this method surfaces the
+   * API's message on the thrown `ApiError`, with `requiredTier` set when the
+   * API sent one.
+   *
+   * Only the options you set are sent; the API fills in its own defaults for
+   * anything left out and reports what it used on the response's
+   * `parameters`. Send only the parameters the chosen indicator accepts
+   * (e.g. `fast_period` belongs to `macd` only); the API answers HTTP 400 for
+   * one that does not apply. See
+   * https://docs.dexpaprika.com/tutorials/technical-indicators for how to
+   * read each indicator's output.
+   *
+   * @param networkId - Network identifier (e.g., 'ethereum', 'solana')
+   * @param tokenAddress - On-chain address of the token
+   * @param options - Which indicator to compute, interval, range and its specific parameters
+   * @returns The indicator's time series plus the parameters actually used
+   */
+  async getIndicator(
+    networkId: string,
+    tokenAddress: string,
+    options: IndicatorOptions
+  ): Promise<TokenIndicatorResponse> {
+    if (!networkId) {
+      throw new Error('Network ID is required');
+    }
+    if (!tokenAddress) {
+      throw new Error('Token address is required');
+    }
+    if (!options?.indicator) {
+      throw new Error('indicator is required');
+    }
+
+    const params = buildIndicatorParams(options);
+
+    return this._get<TokenIndicatorResponse>(
+      `/networks/${networkId}/tokens/${tokenAddress}/indicators`,
+      params
+    );
   }
 }
