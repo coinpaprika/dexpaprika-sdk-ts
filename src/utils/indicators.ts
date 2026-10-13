@@ -7,8 +7,7 @@ import { IndicatorOptions } from '../models/options';
  * The API refuses a parameter that belongs to a different indicator (e.g.
  * `fast_period` with `indicator: 'rsi'` answers HTTP 400), and fills in its
  * own defaults for anything left out. So the SDK must never invent a default
- * here, including `interval`: the server's own default differs by plan and
- * caller (keyless pool indicators default to `1h`, everything else to `24h`).
+ * here, including `interval`, whose server-side default can differ by plan.
  */
 export function buildIndicatorParams(options: IndicatorOptions): Record<string, any> {
   const params: Record<string, any> = { indicator: options.indicator };

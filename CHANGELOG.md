@@ -10,6 +10,8 @@ All notable changes to the DexPaprika SDK will be documented in this file.
 ### Fixed
 - `ApiError` now reads the human-readable `message` field first when the API's error body carries both `error` (a short code, e.g. `"plan_required"` or `"not_found"`) and `message` (the sentence describing it). It previously showed the code instead of the message for any error in that shape, which is the API's actual error envelope on 400, 403 and 404 responses. `ApiError` also carries the structured `errorCode`, `param` and `requiredTier` fields from that envelope, when the API sent them, so a caller can branch on them instead of parsing `error.message`.
 
+## [1.12.1] - 2026-09-29
+
 ### Changed
 - The README and the `apiKey` doc comment now just say to send the key on its own, as the whole `Authorization` value.
 
