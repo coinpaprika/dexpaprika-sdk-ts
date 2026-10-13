@@ -1,10 +1,12 @@
 import { BaseAPI } from './base';
 import { withVolume } from '../utils/ohlcv';
+import { buildIndicatorParams } from '../utils/indicators';
 import {
   PoolDetails,
   OHLCVRecord,
   TransactionsResponse
 } from '../models/pools';
+import { PoolIndicatorResponse } from '../models/indicators';
 import { PoolPaginatedResponse, PoolSearchResponse } from '../models/base';
 import {
   PoolListOptions,
@@ -12,6 +14,7 @@ import {
   PoolDetailsOptions,
   TransactionOptions,
   PoolFilterOptions,
+  IndicatorOptions,
 } from '../models/options';
 import { DeprecatedEndpointError } from '../utils/errors';
 import { mapPoolSortField, mapPoolFilterParams } from '../utils/searchParams';
@@ -285,5 +288,50 @@ export class PoolsAPI extends BaseAPI {
     Object.assign(params, mapPoolFilterParams(filters));
 
     return this._get<PoolSearchResponse>(`/networks/${networkId}/pools/search`, params);
+  }
+
+  /**
+   * Get a technical indicator for a pool: `rsi`, `ema`, `macd`, `bbands` or
+   * `vwap`, computed server-side from the pool's OHLCV candles.
+   *
+   * Available on every plan, with the same `interval` and history limits as
+   * `pools.getOHLCV()`. Those numbers move, so read them from
+   * https://docs.dexpaprika.com/knowledge-base/rate-limits and
+   * https://dexpaprika.com/api/pricing rather than from this doc comment.
+   *
+   * Only the options you set are sent; the API fills in its own defaults for
+   * anything left out and reports what it used on the response's
+   * `parameters`. Send only the parameters the chosen indicator accepts
+   * (e.g. `fast_period` belongs to `macd` only); the API answers HTTP 400 for
+   * one that does not apply. A range too short to compute the indicator also
+   * answers 400. See https://docs.dexpaprika.com/tutorials/technical-indicators
+   * for how to read each indicator's output.
+   *
+   * @param networkId - Network identifier (e.g., 'ethereum', 'solana')
+   * @param poolAddress - On-chain address of the pool
+   * @param options - Which indicator to compute, interval, range and its specific parameters
+   * @returns The indicator's time series plus the parameters actually used
+   */
+  async getIndicator(
+    networkId: string,
+    poolAddress: string,
+    options: IndicatorOptions
+  ): Promise<PoolIndicatorResponse> {
+    if (!networkId) {
+      throw new Error('Network ID is required');
+    }
+    if (!poolAddress) {
+      throw new Error('Pool address is required');
+    }
+    if (!options?.indicator) {
+      throw new Error('indicator is required');
+    }
+
+    const params = buildIndicatorParams(options);
+
+    return this._get<PoolIndicatorResponse>(
+      `/networks/${networkId}/pools/${poolAddress}/indicators`,
+      params
+    );
   }
 }
