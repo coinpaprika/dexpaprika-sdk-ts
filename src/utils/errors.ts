@@ -69,6 +69,20 @@ export class ApiError extends DexPaprikaError {
 }
 
 /**
+ * True when `err` is the API's `plan_required` response for paging a search
+ * endpoint without a key: `errorCode === 'plan_required'` and `param ===
+ * 'cursor'`. Without an API key you get the first page; paging with cursor
+ * needs a key (a free key pages without limit). Safe to call with any
+ * thrown value, not just an {@link ApiError}.
+ *
+ * @param err - The value caught from a failed request
+ * @returns Whether this error means paging needs an API key
+ */
+export function isKeyRequiredForPaging(err: unknown): boolean {
+  return err instanceof ApiError && err.errorCode === 'plan_required' && err.param === 'cursor';
+}
+
+/**
  * Optional deprecation hints surfaced by the API response body.
  */
 export interface DeprecationDetails {

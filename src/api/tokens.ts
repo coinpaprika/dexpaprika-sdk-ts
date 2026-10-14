@@ -44,7 +44,8 @@ export class TokensAPI extends BaseAPI {
    * 'volume_usd') are mapped to canonical sort fields; the endpoint is
    * cursor-paginated (pass `cursor`; read `has_next_page`/`next_cursor` from
    * the response; `page` is ignored). An unknown token address returns an
-   * empty result set, not an error.
+   * empty result set, not an error. Without an API key you get the first
+   * page; paging with cursor needs a key (a free key pages without limit).
    *
    * @param networkId - Network ID (e.g., "ethereum", "solana")
    * @param tokenAddress - Token address or identifier
@@ -80,7 +81,9 @@ export class TokensAPI extends BaseAPI {
    * Backed by the unified /networks/{network}/tokens/search endpoint. Legacy
    * `orderBy` values (e.g. 'volume_24h') are accepted and mapped to canonical
    * sort fields; the endpoint is cursor-paginated (pass `cursor`; read
-   * `has_next_page`/`next_cursor` from the response).
+   * `has_next_page`/`next_cursor` from the response). Without an API key you
+   * get the first page; paging with cursor needs a key (a free key pages
+   * without limit).
    *
    * @param networkId - Network ID (e.g., "ethereum", "solana")
    * @param options - Sorting, limit and cursor pagination options
@@ -116,7 +119,9 @@ export class TokensAPI extends BaseAPI {
    * ignores them, so a bound it does not support looks exactly like a wide
    * filter. Only the 24h price-change window is bounded here; the 6h, 1h and
    * 5m bounds are accepted and ignored by this endpoint, so the SDK does not
-   * offer them. They work on `pools.filter()`.
+   * offer them. They work on `pools.filter()`. Without an API key you get the
+   * first page; paging with cursor needs a key (a free key pages without
+   * limit).
    *
    * @param networkId - Network ID (e.g., "ethereum", "solana")
    * @param options - Filter criteria and cursor pagination options

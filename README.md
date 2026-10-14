@@ -18,6 +18,13 @@ npm install dexpaprika-sdk
 **Breaking change, unreleased**: The API removed `GET /networks/{network}/dexes/{dex}/pools` (now HTTP 410). `pools.listByDex()` keeps its arguments but is backed by the unified search endpoint with a `dex_name` filter, so it returns the cursor-paginated shape `{ results, has_next_page, next_cursor }` instead of `{ pools, page_info }`.
 
 ```javascript
+// Paging past the first page needs an API key (a free key pages without
+// limit): https://console.dexpaprika.com. Dev and Pro keys use
+// https://api-pro.dexpaprika.com as the base URL instead.
+const client = new DexPaprikaClient('https://api.dexpaprika.com', {}, {
+  apiKey: process.env.DEXPAPRIKA_API_KEY
+});
+
 // The call site is unchanged, the response shape is not:
 const curvePools = await client.pools.listByDex('ethereum', 'curve', { limit: 10 });
 console.log(curvePools.results.length, curvePools.has_next_page);
@@ -37,9 +44,19 @@ Rows are the search shape: read `volume_usd_24h`, `transactions_24h` and the
 name (`Curve`); pass the id, which is what `client.networks.getDexes()` returns
 as `dex_id`.
 
+Without an API key you get the first page; paging with cursor needs a key (a
+free key pages without limit, register at https://console.dexpaprika.com).
+
 **Breaking changes in v1.6.0**: The API removed the per-network list/filter REST endpoints (now HTTP 410). `pools.listByNetwork()`, `pools.filter()`, `tokens.getTop()`, and `tokens.filter()` now call the unified search endpoints and return the cursor-paginated shape `{ results, has_next_page, next_cursor }`. Method signatures are unchanged; legacy sort/filter values are mapped internally. See the [CHANGELOG](./CHANGELOG.md) for field-level details.
 
 ```javascript
+// Paging past the first page needs an API key (a free key pages without
+// limit): https://console.dexpaprika.com. Dev and Pro keys use
+// https://api-pro.dexpaprika.com as the base URL instead.
+const client = new DexPaprikaClient('https://api.dexpaprika.com', {}, {
+  apiKey: process.env.DEXPAPRIKA_API_KEY
+});
+
 // Cursor pagination (page is ignored on search endpoints):
 const first = await client.pools.listByNetwork('ethereum', { limit: 10 });
 console.log(first.results, first.has_next_page);

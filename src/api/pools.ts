@@ -57,7 +57,8 @@ export class PoolsAPI extends BaseAPI {
    * Backed by the unified /networks/{network}/pools/search endpoint. Legacy
    * `orderBy` values (e.g. 'volume_usd') are accepted and mapped to canonical
    * sort fields; pass `cursor` for the next page (the response carries
-   * `has_next_page` and `next_cursor`).
+   * `has_next_page` and `next_cursor`). Without an API key you get the first
+   * page; paging with cursor needs a key (a free key pages without limit).
    *
    * @param networkId - Network identifier (e.g., 'ethereum', 'solana')
    * @param options - Options for sorting, limit and cursor pagination
@@ -94,7 +95,9 @@ export class PoolsAPI extends BaseAPI {
    *
    * Legacy `orderBy` values (e.g. 'volume_usd') are accepted and mapped to
    * canonical sort fields; pass `cursor` for the next page (the response carries
-   * `has_next_page` and `next_cursor`). `page` is ignored.
+   * `has_next_page` and `next_cursor`). `page` is ignored. Without an API key
+   * you get the first page; paging with cursor needs a key (a free key pages
+   * without limit).
    *
    * @param networkId - Network identifier (e.g., 'ethereum', 'solana')
    * @param dexId - DEX identifier (e.g., 'uniswap_v3', 'curve')
@@ -247,6 +250,8 @@ export class PoolsAPI extends BaseAPI {
    * The endpoint ignores query parameters it does not recognize and still
    * answers 200, so a misspelled bound comes back as a full unfiltered page
    * rather than an error. Compare against an unfiltered call when in doubt.
+   * Without an API key you get the first page; paging with cursor needs a
+   * key (a free key pages without limit).
    *
    * @param networkId - Network identifier (e.g., 'ethereum', 'solana')
    * @param options - Filter criteria and cursor pagination options
