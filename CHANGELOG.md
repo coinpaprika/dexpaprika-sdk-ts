@@ -2,7 +2,7 @@
 
 All notable changes to the DexPaprika SDK will be documented in this file.
 
-## [Unreleased]
+## [1.13.0] - 2026-10-14
 
 ### Added
 - `pools.getIndicator(networkId, poolAddress, options)` and `tokens.getIndicator(networkId, tokenAddress, options)`: `rsi`, `ema`, `macd`, `bbands` and `vwap`, computed server-side from OHLCV candles. `IndicatorOptions` takes `indicator` (required), `interval`, `limit`, `start`, `end`, `cursor`, and the indicator-specific `period`, `fast_period`, `slow_period`, `signal_period` and `std_dev`. Only the options the caller sets are sent; the API fills in its own defaults otherwise, and refuses a parameter that belongs to a different indicator with HTTP 400. Pool indicators are available on every plan with the same interval and history limits as `pools.getOHLCV()`; token indicators need a Dev, Pro or Enterprise plan, and the same host and `Authorization` rules as `tokens.getOHLCV()`. See "Technical Indicators" in the README.
