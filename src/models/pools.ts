@@ -71,6 +71,7 @@ export interface SearchPool {
   price_change_percentage_1h?: number | null;
   price_change_percentage_6h?: number | null;
   price_change_percentage_24h?: number | null;
+  price_change_percentage_48h?: number | null;
   tokens: PoolTokenRef[];
 }
 

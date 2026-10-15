@@ -34,6 +34,10 @@ const POOL_SORT_FIELD_MAP: Record<string, string> = {
   price_change_percentage_6h: 'price_change_percentage_6h',
   price_change_percentage_1h: 'price_change_percentage_1h',
   price_change_percentage_5m: 'price_change_percentage_5m',
+  // Shipped 2026-10-02. Pools only, same as the three windows above:
+  // tokens/search answers 400 for it as a sort value, so it stays out of
+  // TOKEN_SORT_FIELD_MAP.
+  price_change_percentage_48h: 'price_change_percentage_48h',
 };
 
 // Tokens: legacy aliases plus canonical pass-through. Unknown -> default.

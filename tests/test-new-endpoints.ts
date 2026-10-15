@@ -56,20 +56,20 @@ async function main() {
   // The names the SDK puts on the wire are pinned offline in
   // tests/test-search-params.ts, which needs no network and no market. What
   // follows proves the live API still honours each bound.
-  await test('pools.filter - all eight price-change bounds apply', async () => {
+  await test('pools.filter - all ten price-change bounds apply', async () => {
     const baseline = await client.pools.filter('ethereum', { limit: 5 });
     if (baseline.results.length === 0) throw new Error('No baseline results');
 
-    type Window = '24h' | '6h' | '1h' | '5m';
+    type Window = '24h' | '48h' | '6h' | '1h' | '5m';
     const read = (pool: any, w: Window): number | null | undefined =>
       pool[`price_change_percentage_${w}`];
 
     // 10 percent is far enough outside the ordinary spread that the unfiltered
-    // page never clears it, on any of the four windows, and close enough in
+    // page never clears it, on any of the five windows, and close enough in
     // that ethereum usually has rows on the daily and hourly ones.
     const BOUND = 10;
     const checks: { option: string; window: Window; kind: 'min' | 'max' }[] = [];
-    for (const w of ['24h', '6h', '1h', '5m'] as Window[]) {
+    for (const w of ['24h', '48h', '6h', '1h', '5m'] as Window[]) {
       checks.push({ option: `priceChange${w}Min`, window: w, kind: 'min' });
       checks.push({ option: `priceChange${w}Max`, window: w, kind: 'max' });
     }
@@ -141,11 +141,12 @@ async function main() {
     console.log(`   Top 1h mover: ${ordered[0].toFixed(2)}%, ${ordered.length} rows checked for order`);
   });
 
-  await test('short price-change windows are pools only', async () => {
+  await test('price-change windows other than 24h are pools only', async () => {
     // The 24h window works on both endpoints, for sorting and for filtering.
-    // Only 6h, 1h and 5m are pools-only, and they fail differently: tokens/search
+    // 48h, 6h, 1h and 5m are pools-only, and they fail differently: tokens/search
     // returns 400 for them as a sort field, and ignores them as a filter bound.
     const windows = [
+      'price_change_percentage_48h',
       'price_change_percentage_6h',
       'price_change_percentage_1h',
       'price_change_percentage_5m',
@@ -174,7 +175,7 @@ async function main() {
     if (row.price_change_percentage_24h === undefined) {
       throw new Error('Token rows no longer carry price_change_percentage_24h');
     }
-    console.log('   6h/1h/5m pass through on pools and fall back on tokens, 24h works on both');
+    console.log('   48h/6h/1h/5m pass through on pools and fall back on tokens, 24h works on both');
   });
 
   await test('tokens.filter - 24h price change bounds apply', async () => {
