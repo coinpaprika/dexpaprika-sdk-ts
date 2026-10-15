@@ -68,6 +68,8 @@ function assertEqual(actual: unknown, expected: unknown, what: string) {
 const POOL_BOUNDS: [keyof import('../src/models/options').PoolFilterOptions, string][] = [
   ['priceChange24hMin', 'price_change_percentage_24h_min'],
   ['priceChange24hMax', 'price_change_percentage_24h_max'],
+  ['priceChange48hMin', 'price_change_percentage_48h_min'],
+  ['priceChange48hMax', 'price_change_percentage_48h_max'],
   ['priceChange6hMin', 'price_change_percentage_6h_min'],
   ['priceChange6hMax', 'price_change_percentage_6h_max'],
   ['priceChange1hMin', 'price_change_percentage_1h_min'],
@@ -125,7 +127,7 @@ async function main() {
     assertEqual(params.volume_usd_24h_min, 100000, 'params.volume_usd_24h_min');
   });
 
-  await test('pools.filter sends all eight bounds together, none overwriting another', async () => {
+  await test('pools.filter sends all ten bounds together, none overwriting another', async () => {
     const client = new RecordingClient();
     const pools = new PoolsAPI(client);
     const options: Record<string, number> = {};
@@ -164,9 +166,10 @@ async function main() {
     }
   });
 
-  await test('pool sort fields pass through for all four windows', async () => {
+  await test('pool sort fields pass through for all five windows', async () => {
     for (const field of [
       'price_change_percentage_24h',
+      'price_change_percentage_48h',
       'price_change_percentage_6h',
       'price_change_percentage_1h',
       'price_change_percentage_5m',
@@ -179,13 +182,32 @@ async function main() {
     assertEqual(client.lastParams().order_by, 'price_change_percentage_5m', 'params.order_by');
   });
 
-  await test('token sort keeps 24h and folds the three short windows', async () => {
+  // Regression: on the old allowlist, an order_by the SDK did not recognize
+  // fell back to the default sort field (volume_usd_24h) instead of passing
+  // through or erroring, so a caller sorting by 48h silently got a 24h-volume
+  // sort. This fails against that code: mapPoolSortField('price_change_percentage_48h')
+  // returned 'volume_usd_24h', not the field itself.
+  await test('mapPoolSortField does not fall back on the 48h window', () => {
+    assertEqual(
+      mapPoolSortField('price_change_percentage_48h'),
+      'price_change_percentage_48h',
+      "mapPoolSortField('price_change_percentage_48h')"
+    );
+    const client = new RecordingClient();
+    const pools = new PoolsAPI(client);
+    return pools.filter('ethereum', { sortBy: 'price_change_percentage_48h' }).then(() => {
+      assertEqual(client.lastParams().order_by, 'price_change_percentage_48h', 'params.order_by');
+    });
+  });
+
+  await test('token sort keeps 24h and folds the other four windows', async () => {
     assertEqual(
       mapTokenSortField('price_change_percentage_24h'),
       'price_change_percentage_24h',
       "mapTokenSortField('price_change_percentage_24h')"
     );
     for (const field of [
+      'price_change_percentage_48h',
       'price_change_percentage_6h',
       'price_change_percentage_1h',
       'price_change_percentage_5m',

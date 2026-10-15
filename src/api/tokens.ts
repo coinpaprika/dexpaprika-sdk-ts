@@ -114,9 +114,9 @@ export class TokensAPI extends BaseAPI {
    *
    * The endpoint answers 200 for query parameters it does not recognize and
    * ignores them, so a bound it does not support looks exactly like a wide
-   * filter. Only the 24h price-change window is bounded here; the 6h, 1h and
-   * 5m bounds are accepted and ignored by this endpoint, so the SDK does not
-   * offer them. They work on `pools.filter()`.
+   * filter. Only the 24h price-change window is bounded here; the 48h, 6h, 1h
+   * and 5m bounds are accepted and ignored by this endpoint, so the SDK does
+   * not offer them. They work on `pools.filter()`.
    *
    * @param networkId - Network ID (e.g., "ethereum", "solana")
    * @param options - Filter criteria and cursor pagination options

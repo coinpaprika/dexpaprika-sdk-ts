@@ -277,6 +277,8 @@ export class PoolsAPI extends BaseAPI {
     if (options?.txns24hMin !== undefined) filters.txns_24h_min = options.txns24hMin;
     if (options?.priceChange24hMin !== undefined) filters.price_change_percentage_24h_min = options.priceChange24hMin;
     if (options?.priceChange24hMax !== undefined) filters.price_change_percentage_24h_max = options.priceChange24hMax;
+    if (options?.priceChange48hMin !== undefined) filters.price_change_percentage_48h_min = options.priceChange48hMin;
+    if (options?.priceChange48hMax !== undefined) filters.price_change_percentage_48h_max = options.priceChange48hMax;
     if (options?.priceChange6hMin !== undefined) filters.price_change_percentage_6h_min = options.priceChange6hMin;
     if (options?.priceChange6hMax !== undefined) filters.price_change_percentage_6h_max = options.priceChange6hMax;
     if (options?.priceChange1hMin !== undefined) filters.price_change_percentage_1h_min = options.priceChange1hMin;
