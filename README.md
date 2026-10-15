@@ -458,9 +458,9 @@ console.log(`Found ${filtered.results.length} pools matching criteria`);
 // Next page: pass filtered.next_cursor as `cursor`
 ```
 
-`pools.filter()` also takes price-change bounds on four windows: 24h, 6h, 1h and
-5m. The values are percentages, and a negative bound is the ordinary way to ask
-for pools that fell.
+`pools.filter()` also takes price-change bounds on five windows: 24h, 48h, 6h,
+1h and 5m. The values are percentages, and a negative bound is the ordinary way
+to ask for pools that fell.
 
 ```js
 // Pools up at least 50% in the last hour, biggest mover first
@@ -478,12 +478,14 @@ const losers = await client.pools.filter('ethereum', {
 ```
 
 Every window has a `Min` and a `Max` form: `priceChange24hMin`/`Max`,
-`priceChange6hMin`/`Max`, `priceChange1hMin`/`Max`, `priceChange5mMin`/`Max`.
+`priceChange48hMin`/`Max`, `priceChange6hMin`/`Max`, `priceChange1hMin`/`Max`,
+`priceChange5mMin`/`Max`.
 
 Pool sort fields: `volume_usd_24h`, `volume_usd_7d`, `volume_usd_30d`,
 `liquidity_usd`, `txns_24h`, `created_at`, `price_usd`,
-`price_change_percentage_24h`, `price_change_percentage_6h`,
-`price_change_percentage_1h`, `price_change_percentage_5m`.
+`price_change_percentage_24h`, `price_change_percentage_48h`,
+`price_change_percentage_6h`, `price_change_percentage_1h`,
+`price_change_percentage_5m`.
 
 #### What the token endpoint does with the same windows
 
@@ -491,12 +493,12 @@ The 24h window is common to both search endpoints. `tokens.filter()` takes
 `priceChange24hMin`/`Max`, and `price_change_percentage_24h` is a valid token
 sort field.
 
-Only the three short windows, 6h, 1h and 5m, are pools-only, and they fail in
+The other four windows, 48h, 6h, 1h and 5m, are pools-only, and they fail in
 two different ways on `/networks/{network}/tokens/search`. As a sort value the
 endpoint returns HTTP 400. As a filter bound it returns 200 and ignores the
 parameter, which is indistinguishable from a wide filter unless you compare the
 page against an unfiltered one. So `tokens.getTop()` and `tokens.filter()` take
-neither, rather than passing along something that silently does nothing.
+none of them, rather than passing along something that silently does nothing.
 
 ### Top Tokens & Token Filtering
 
