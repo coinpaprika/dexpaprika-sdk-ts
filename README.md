@@ -232,6 +232,14 @@ console.log(client.cacheSize);   // Get current cache size
 client.setCacheEnabled(false);   // Temporarily disable caching
 ```
 
+On a 429, the SDK honours how long the API asked it to wait: the `Retry-After`
+header first (seconds), the response body's `retry_after` field when there is
+no header, and the configured `delaySequenceMs` backoff when neither is usable.
+An HTTP-date form of `Retry-After` is not parsed and falls back to the normal
+backoff the same way. The accepted wait is clamped to 60 seconds, and only
+replaces the local backoff when it is longer. A 404, and every other 4xx
+besides 429, is never retried regardless of `retryableStatuses`.
+
 ## API Reference
 
 For detailed API documentation, visit [docs.dexpaprika.com](https://docs.dexpaprika.com)
@@ -601,6 +609,15 @@ try {
   }
 }
 ```
+
+A 403 whose body is not JSON never came from the API itself. It is the edge
+in front of it rejecting the request before any app logic ran, and it means
+the key was not accepted: nothing was pasted in front of it, and the whole
+value went into the `Authorization` header. `ApiError.message` says so
+plainly instead of leaking a raw HTML page. Get a key at
+[console.dexpaprika.com](https://console.dexpaprika.com). A 403 that does
+carry a JSON body, such as `plan_required` above, is unaffected and keeps its
+`errorCode`, `param` and `requiredTier` fields.
 
 Using the error helper:
 
