@@ -232,6 +232,14 @@ console.log(client.cacheSize);   // Get current cache size
 client.setCacheEnabled(false);   // Temporarily disable caching
 ```
 
+On a 429, the SDK honours how long the API asked it to wait: the `Retry-After`
+header first (seconds), the response body's `retry_after` field when there is
+no header, and the configured `delaySequenceMs` backoff when neither is usable.
+An HTTP-date form of `Retry-After` is not parsed and falls back to the normal
+backoff the same way. The accepted wait is clamped to 60 seconds, and only
+replaces the local backoff when it is longer. A 404, and every other 4xx
+besides 429, is never retried regardless of `retryableStatuses`.
+
 ## API Reference
 
 For detailed API documentation, visit [docs.dexpaprika.com](https://docs.dexpaprika.com)

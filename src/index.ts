@@ -21,7 +21,7 @@ export * from './models/utils';
 export * from './models/options';
 
 // Utility exports
-export { RetryConfig, defaultRetryConfig, withRetry } from './utils/helpers';
+export { RetryConfig, defaultRetryConfig, withRetry, retryAfterMs } from './utils/helpers';
 export { Cache, CacheConfig, defaultCacheConfig } from './utils/cache';
 
 // Error class exports
