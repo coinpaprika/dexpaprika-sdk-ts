@@ -602,6 +602,15 @@ try {
 }
 ```
 
+A 403 whose body is not JSON never came from the API itself. It is the edge
+in front of it rejecting the request before any app logic ran, and it means
+the key was not accepted: nothing was pasted in front of it, and the whole
+value went into the `Authorization` header. `ApiError.message` says so
+plainly instead of leaking a raw HTML page. Get a key at
+[console.dexpaprika.com](https://console.dexpaprika.com). A 403 that does
+carry a JSON body, such as `plan_required` above, is unaffected and keeps its
+`errorCode`, `param` and `requiredTier` fields.
+
 Using the error helper:
 
 ```js

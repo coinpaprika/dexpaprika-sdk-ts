@@ -93,6 +93,18 @@ export class BaseAPI {
           throw new DeprecatedEndpointError(endpoint, 'check API documentation for alternatives');
         }
 
+        // A 403 whose body is not JSON never came from the API itself: it is
+        // the edge in front of it (Cloudflare) rejecting the request before
+        // app logic ran, typically because the key was malformed. The API's
+        // own 403s (e.g. `plan_required`) always carry a JSON body and are
+        // untouched above, since `bodyIsObject` is true for those.
+        if (status === 403 && !bodyIsObject) {
+          throw new ApiError(
+            'The API key was refused before it reached the API. Check that the whole key was pasted into the Authorization header with nothing in front of it. Keys are at https://console.dexpaprika.com.',
+            status
+          );
+        }
+
         // Handle not found errors with context
         if (status === 404) {
           if (message.toLowerCase().includes('network')) {

@@ -2,6 +2,19 @@
 
 All notable changes to the DexPaprika SDK will be documented in this file.
 
+## [1.14.0] - 2026-10-16
+
+### Added
+- `pools.filter()` sort and the search response now cover the 48h price-change window: `mapPoolSortField` passes `price_change_percentage_48h` through instead of silently falling back to `volume_usd_24h`, `PoolFilterOptions` takes `priceChange48hMin` and `priceChange48hMax`, and `SearchPool` carries `price_change_percentage_48h`. Token search is unchanged; it still answers 400 for this sort value and ignores the bounds.
+- `isKeyRequiredForPaging(error)`, exported from the package root, to check whether an error means paging a search endpoint with `cursor` needs an API key.
+
+### Fixed
+- Pool search sorting by `price_change_percentage_48h` used to silently fall back to `volume_usd_24h` because the field was missing from the SDK's sort-field allowlist, so a caller asking for the 48h window got a 24h-volume sort with no warning. The allowlist now passes it through.
+- A 403 whose body is not JSON, such as a Cloudflare block page, used to surface as "Unknown API error". It now throws an `ApiError` that says the API key was refused before it reached the API, with guidance to check that the whole key was pasted into the `Authorization` header with nothing in front of it and that keys are issued at console.dexpaprika.com. A 403 that does carry a JSON body, such as the API's own `plan_required` response, is unaffected.
+
+### Changed
+- `pools/search` and `tokens/search` now require an API key (a free one included) to page past the first result with `cursor`. The API currently answers 200 with an `x-api-warning` header; a keyless `cursor` request is expected to get a 403 `plan_required` response with `required_tier: "free"` and `param: "cursor"` starting around 2026-10-21. The JSDoc on every cursor-taking search method notes this, and the README's cursor-pagination snippets now build a client from `DEXPAPRIKA_API_KEY`.
+
 ## [1.13.0] - 2026-10-14
 
 ### Added
