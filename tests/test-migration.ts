@@ -71,17 +71,25 @@ async function testMigration() {
     }
     console.log(`PASS: ${wethPools.results.length} pools, all contain WETH`);
 
-    if (!wethPools.has_next_page || !wethPools.next_cursor) {
-      throw new Error('Expected a next cursor for WETH pools');
+    // Cursor paging on a search endpoint needs an API key (a free key pages
+    // without limit); without one, skip this step rather than page keyless.
+    const apiKey = process.env.DEXPAPRIKA_API_KEY;
+    if (!apiKey) {
+      console.log('  skip  cursor paging (no DEXPAPRIKA_API_KEY set; paging past the first page needs an API key)');
+    } else {
+      if (!wethPools.has_next_page || !wethPools.next_cursor) {
+        throw new Error('Expected a next cursor for WETH pools');
+      }
+      const keyedClient = new DexPaprikaClient(undefined, {}, { apiKey });
+      const wethPage2 = await keyedClient.tokens.getPools('ethereum', weth, {
+        limit: 3,
+        cursor: wethPools.next_cursor,
+      });
+      if (wethPage2.results.length === 0 || wethPage2.results[0].id === wethPools.results[0].id) {
+        throw new Error('Cursor pagination did not advance to the next page');
+      }
+      console.log('PASS: Cursor pagination works for token pools');
     }
-    const wethPage2 = await client.tokens.getPools('ethereum', weth, {
-      limit: 3,
-      cursor: wethPools.next_cursor,
-    });
-    if (wethPage2.results.length === 0 || wethPage2.results[0].id === wethPools.results[0].id) {
-      throw new Error('Cursor pagination did not advance to the next page');
-    }
-    console.log('PASS: Cursor pagination works for token pools');
 
     // Test 6: Show migration example
     console.log('\n6. Migration example:');

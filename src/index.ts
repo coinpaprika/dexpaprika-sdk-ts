@@ -30,5 +30,6 @@ export {
   NetworkNotFoundError, 
   PoolNotFoundError, 
   ApiError, 
-  DeprecatedEndpointError 
+  DeprecatedEndpointError, 
+  isKeyRequiredForPaging 
 } from './utils/errors'; 
