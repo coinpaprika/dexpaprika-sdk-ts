@@ -83,7 +83,7 @@ OHLCV availability now depends on your plan. Nothing in the SDK's API surface ch
 ## [1.10.0] - 2026-08-14
 
 ### Added
-- **Optional API key.** `new DexPaprikaClient(baseUrl, options, { apiKey })`, falling back to the `DEXPAPRIKA_API_KEY` environment variable when none is passed. Keyless remains the default and is unchanged: without a key the client sends exactly what it sent before. The key is transmitted as the **entire** `Authorization` value, with no `Bearer` prefix and no other scheme word, because the API checksums the raw header and a scheme word returns 401.
+- **Optional API key.** `new DexPaprikaClient(baseUrl, options, { apiKey })`, falling back to the `DEXPAPRIKA_API_KEY` environment variable when none is passed. Keyless remains the default and is unchanged: without a key the client sends exactly what it sent before. The key is transmitted as the **entire** `Authorization` value, with nothing in front of it.
 - `resolveApiKey` is exported so callers can reuse the same precedence and validation.
 - The host is never inferred from the presence of a key. Free keys are served from the default `baseUrl` and only Pro moves to `api-pro.dexpaprika.com`, which callers pass as `baseUrl`. Sending a free key to the Pro host returns 403.
 
