@@ -1,6 +1,6 @@
 {
   "name": "dexpaprika-sdk",
-  "version": "1.14.0",
+  "version": "1.14.1",
   "description": "JavaScript SDK for the DexPaprika API",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -15,7 +15,7 @@
     "test:dex-pools": "tsx tests/test-dex-pools.ts",
     "test:token-ohlcv": "tsx tests/test-token-ohlcv.ts",
     "test:indicators": "tsx tests/test-indicators.ts",
-    "test:all": "npm test && npm run verify && npm run verify:real && tsx tests/test-token-summary.ts && npm run test:migration && npm run test:params && npm run test:endpoints && npm run test:dex-pools && npm run test:token-ohlcv && npm run test:indicators && npm run test:paging-key-error && npm run test:blocked-key-error && npm run test:retry-after",
+    "test:all": "npm test && npm run verify && npm run verify:real && tsx tests/test-token-summary.ts && npm run test:migration && npm run test:params && npm run test:endpoints && npm run test:dex-pools && npm run test:token-ohlcv && npm run test:indicators && npm run test:paging-key-error && npm run test:blocked-key-error && npm run test:retry-after && npm run test:path-params",
     "example": "tsx examples/basic-example.ts",
     "example:cache": "tsx examples/retry-cache-example.ts",
     "verify": "tsx tests/test-retry-cache.ts",
@@ -25,7 +25,8 @@
     "test:blocked-key-error": "tsx tests/test-blocked-key-error.ts",
     "test:retry-after": "tsx tests/test-retry-after.ts",
     "typecheck:tests": "tsc -p tests/tsconfig.json",
-    "test:types": "tsx tests/test-transactions-type.ts"
+    "test:types": "tsx tests/test-transactions-type.ts",
+    "test:path-params": "tsx tests/test-path-params.ts"
   },
   "keywords": [
     "dexpaprika",

@@ -36,3 +36,6 @@ jobs:
 
       - name: Response type tests
         run: npm run test:types
+
+      - name: Path parameter tests
+        run: npm run test:path-params

@@ -1,4 +1,5 @@
 import { BaseAPI } from './base';
+import { pathSegment } from '../utils/path';
 import { withVolume } from '../utils/ohlcv';
 import { buildIndicatorParams } from '../utils/indicators';
 import {
@@ -30,7 +31,7 @@ export class TokensAPI extends BaseAPI {
    * @returns Detailed information about the token
    */
   async getDetails(networkId: string, tokenAddress: string): Promise<TokenDetails> {
-    return this._get<TokenDetails>(`/networks/${networkId}/tokens/${tokenAddress}`);
+    return this._get<TokenDetails>(`/networks/${pathSegment('networkId', networkId)}/tokens/${pathSegment('tokenAddress', tokenAddress)}`);
   }
   
   /**
@@ -70,7 +71,7 @@ export class TokensAPI extends BaseAPI {
     // act as a pair filter; the API uses only one of the values (not
     // guaranteed by order).
     return this._get<PoolSearchResponse>(
-      `/networks/${networkId}/pools/search`,
+      `/networks/${pathSegment('networkId', networkId)}/pools/search`,
       params
     );
   }
@@ -101,7 +102,7 @@ export class TokensAPI extends BaseAPI {
     if (options?.cursor) params.cursor = options.cursor;
 
     return this._get<TokenSearchResponse>(
-      `/networks/${networkId}/tokens/search`,
+      `/networks/${pathSegment('networkId', networkId)}/tokens/search`,
       params
     );
   }
@@ -151,7 +152,7 @@ export class TokensAPI extends BaseAPI {
     if (options?.createdBefore !== undefined) filters.created_before = options.createdBefore;
     Object.assign(params, mapTokenFilterParams(filters));
 
-    return this._get<TokenSearchResponse>(`/networks/${networkId}/tokens/search`, params);
+    return this._get<TokenSearchResponse>(`/networks/${pathSegment('networkId', networkId)}/tokens/search`, params);
   }
 
   /**
@@ -192,7 +193,7 @@ export class TokensAPI extends BaseAPI {
 
     if (options.end) params.end = options.end;
 
-    const rows = await this._get<OHLCVRecord[]>(`/networks/${networkId}/tokens/${tokenAddress}/ohlcv`, params);
+    const rows = await this._get<OHLCVRecord[]>(`/networks/${pathSegment('networkId', networkId)}/tokens/${pathSegment('tokenAddress', tokenAddress)}/ohlcv`, params);
     return withVolume(rows);
   }
 
@@ -215,7 +216,7 @@ export class TokensAPI extends BaseAPI {
     }
 
     const params = { tokens: tokens.join(',') };
-    return this._get<TokenPrice[]>(`/networks/${networkId}/multi/prices`, params);
+    return this._get<TokenPrice[]>(`/networks/${pathSegment('networkId', networkId)}/multi/prices`, params);
   }
 
   /**
@@ -260,7 +261,7 @@ export class TokensAPI extends BaseAPI {
     const params = buildIndicatorParams(options);
 
     return this._get<TokenIndicatorResponse>(
-      `/networks/${networkId}/tokens/${tokenAddress}/indicators`,
+      `/networks/${pathSegment('networkId', networkId)}/tokens/${pathSegment('tokenAddress', tokenAddress)}/indicators`,
       params
     );
   }
