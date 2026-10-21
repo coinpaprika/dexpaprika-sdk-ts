@@ -39,3 +39,6 @@ jobs:
 
       - name: Path parameter tests
         run: npm run test:path-params
+
+      - name: Cache key size tests
+        run: npm run test:cache-key-size

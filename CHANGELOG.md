@@ -2,6 +2,11 @@
 
 All notable changes to the DexPaprika SDK will be documented in this file.
 
+## [1.14.2] - 2026-10-21
+
+### Security
+- The response cache keyed entries on the request path plus its params, which embed whatever a caller passed as a network id, pool address or token address, so an id of unusual length was held in the cache at that length. A request whose cache key is longer than 2,048 characters now skips the cache. Keys are not hashed, so one request can never be answered with another's cached data.
+
 ## [1.14.1] - 2026-10-21
 
 ### Security

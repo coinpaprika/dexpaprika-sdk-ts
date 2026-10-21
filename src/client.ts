@@ -9,6 +9,9 @@ import { withRetry, RetryConfig, defaultRetryConfig } from './utils/helpers';
 import { Cache, CacheConfig } from './utils/cache';
 import { API_KEY_ENV_VAR, VERSION } from './version';
 
+/** Longest cache key stored; a real path plus its params is far shorter. */
+export const MAX_CACHE_KEY_LENGTH = 2048;
+
 /**
  * Client configuration options
  */
@@ -129,9 +132,14 @@ export class DexPaprikaClient {
    */
   async get<T>(endpoint: string, params?: Record<string, any>): Promise<T> {
     const cacheKey = this.getCacheKey(endpoint, params);
+    // The key embeds caller-supplied ids verbatim, so a request whose key is
+    // longer than any real one skips the cache instead of being held in it.
+    // The key is not hashed: a short hash could let one request be answered
+    // with another request's cached data.
+    const cacheable = cacheKey.length <= MAX_CACHE_KEY_LENGTH;
     
     // Check cache first
-    const cachedData = this.cache.get(cacheKey) as T | undefined;
+    const cachedData = cacheable ? (this.cache.get(cacheKey) as T | undefined) : undefined;
     if (cachedData) {
       return cachedData;
     }
@@ -142,7 +150,7 @@ export class DexPaprikaClient {
       const response: AxiosResponse<T> = await this.httpClient.get(url, { params });
       
       // Cache the result
-      this.cache.set(cacheKey, response.data);
+      if (cacheable) this.cache.set(cacheKey, response.data);
       
       return response.data;
     };
