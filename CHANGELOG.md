@@ -2,6 +2,11 @@
 
 All notable changes to the DexPaprika SDK will be documented in this file.
 
+## [1.14.1] - 2026-10-21
+
+### Security
+- Network ids, pool addresses and token addresses are now checked before they go into the request path. A value containing `/`, `\`, `?`, `#`, `%`, whitespace or a control character, or one that is empty, `.` or `..`, throws a `DexPaprikaError` and no request is sent. Until now such a value was placed in the URL as given, so an application that passed user input to the SDK could be made to send its API key to a different endpoint or with a different query, for example `pools.getDetails('ethereum', '../../../stats')`. Real ids, including Sui and Aptos ids with `::` and TON addresses, are sent unchanged.
+
 ## [1.14.0] - 2026-10-16
 
 ### Added

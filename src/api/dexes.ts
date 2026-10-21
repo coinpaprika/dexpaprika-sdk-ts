@@ -1,4 +1,5 @@
 import { BaseAPI } from './base';
+import { pathSegment } from '../utils/path';
 import { DexPaginatedResponse } from '../models/base';
 import { PaginationOptions } from '../models/options';
 
@@ -22,6 +23,6 @@ export class DexesAPI extends BaseAPI {
       limit: options?.limit ?? 10
     };
     
-    return this._get<DexPaginatedResponse>(`/networks/${networkId}/dexes`, params);
+    return this._get<DexPaginatedResponse>(`/networks/${pathSegment('networkId', networkId)}/dexes`, params);
   }
 } 

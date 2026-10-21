@@ -1,4 +1,5 @@
 import { BaseAPI } from './base';
+import { pathSegment } from '../utils/path';
 import { withVolume } from '../utils/ohlcv';
 import { buildIndicatorParams } from '../utils/indicators';
 import {
@@ -79,7 +80,7 @@ export class PoolsAPI extends BaseAPI {
     };
     if (options?.cursor) params.cursor = options.cursor;
 
-    return this._get<PoolSearchResponse>(`/networks/${networkId}/pools/search`, params);
+    return this._get<PoolSearchResponse>(`/networks/${pathSegment('networkId', networkId)}/pools/search`, params);
   }
   
   /**
@@ -124,7 +125,7 @@ export class PoolsAPI extends BaseAPI {
     };
     if (options?.cursor) params.cursor = options.cursor;
 
-    return this._get<PoolSearchResponse>(`/networks/${networkId}/pools/search`, params);
+    return this._get<PoolSearchResponse>(`/networks/${pathSegment('networkId', networkId)}/pools/search`, params);
   }
   
   /**
@@ -150,7 +151,7 @@ export class PoolsAPI extends BaseAPI {
     const params: Record<string, any> = {};
     if (options?.inversed) params.inversed = 'true';
     
-    return this._get<PoolDetails>(`/networks/${networkId}/pools/${poolAddress}`, params);
+    return this._get<PoolDetails>(`/networks/${pathSegment('networkId', networkId)}/pools/${pathSegment('poolAddress', poolAddress)}`, params);
   }
   
   /**
@@ -186,7 +187,7 @@ export class PoolsAPI extends BaseAPI {
     if (options.end) params.end = options.end;
     if (options.inversed) params.inversed = 'true';
     
-    const rows = await this._get<OHLCVRecord[]>(`/networks/${networkId}/pools/${poolAddress}/ohlcv`, params);
+    const rows = await this._get<OHLCVRecord[]>(`/networks/${pathSegment('networkId', networkId)}/pools/${pathSegment('poolAddress', poolAddress)}/ohlcv`, params);
     return withVolume(rows);
   }
   
@@ -219,7 +220,7 @@ export class PoolsAPI extends BaseAPI {
     if (options?.from !== undefined) params.from = options.from;
     if (options?.to !== undefined) params.to = options.to;
 
-    return this._get<TransactionsResponse>(`/networks/${networkId}/pools/${poolAddress}/transactions`, params);
+    return this._get<TransactionsResponse>(`/networks/${pathSegment('networkId', networkId)}/pools/${pathSegment('poolAddress', poolAddress)}/transactions`, params);
   }
   
   /**
@@ -294,7 +295,7 @@ export class PoolsAPI extends BaseAPI {
     if (options?.createdBefore !== undefined) filters.created_before = options.createdBefore;
     Object.assign(params, mapPoolFilterParams(filters));
 
-    return this._get<PoolSearchResponse>(`/networks/${networkId}/pools/search`, params);
+    return this._get<PoolSearchResponse>(`/networks/${pathSegment('networkId', networkId)}/pools/search`, params);
   }
 
   /**
@@ -337,7 +338,7 @@ export class PoolsAPI extends BaseAPI {
     const params = buildIndicatorParams(options);
 
     return this._get<PoolIndicatorResponse>(
-      `/networks/${networkId}/pools/${poolAddress}/indicators`,
+      `/networks/${pathSegment('networkId', networkId)}/pools/${pathSegment('poolAddress', poolAddress)}/indicators`,
       params
     );
   }
