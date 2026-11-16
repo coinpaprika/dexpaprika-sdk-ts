@@ -2,6 +2,11 @@
 
 All notable changes to the DexPaprika SDK will be documented in this file.
 
+## [1.14.3] - 2026-11-16
+
+### Fixed
+- `tokens.filter()` sent `fdvMin` and `fdvMax` as `fdv_min` and `fdv_max`. The API calls them `fdv_usd_min` and `fdv_usd_max`, so today the FDV bounds are ignored and the results are not filtered by FDV. They now go out under the right names. From 23 November 2026 the API answers `400` to a query parameter an endpoint does not accept, so before this fix any call that set an FDV bound would have failed from that date.
+
 ## [1.14.2] - 2026-10-21
 
 ### Security

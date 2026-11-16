@@ -101,6 +101,8 @@ const POOL_FILTER_PARAM_MAP: Record<string, string> = {
 const TOKEN_FILTER_PARAM_MAP: Record<string, string> = {
   volume_24h_min: 'volume_usd_24h_min',
   volume_24h_max: 'volume_usd_24h_max',
+  fdv_min: 'fdv_usd_min',
+  fdv_max: 'fdv_usd_max',
 };
 
 function remapKeys(
@@ -125,7 +127,7 @@ export function mapPoolFilterParams(params: Record<string, any>): Record<string,
 
 /**
  * Rename legacy token filter param names to the canonical tokens/search names.
- * Names not in the map (e.g. liquidity_usd_min, fdv_min) pass through.
+ * Names not in the map (e.g. liquidity_usd_min, txns_24h_min) pass through.
  */
 export function mapTokenFilterParams(params: Record<string, any>): Record<string, any> {
   return remapKeys(params, TOKEN_FILTER_PARAM_MAP);
