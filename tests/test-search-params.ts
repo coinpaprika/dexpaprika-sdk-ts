@@ -1,8 +1,9 @@
 /// <reference types="node" />
 // Offline checks on the query the SDK builds for the two search endpoints.
 //
-// Why this file exists: /pools/search and /tokens/search answer 200 for query
-// parameters they do not recognize, and silently ignore them. A bound that the
+// Why this file exists: until 23 November 2026 /pools/search and /tokens/search
+// answer 200 for query parameters they do not recognize, and silently ignore
+// them; from that date they answer 400. A bound that the
 // SDK spells wrong, or drops on the floor, therefore comes back as a full
 // unfiltered page rather than an error, and a live test that only checks the
 // status code cannot tell the two apart. These checks read the params off the
@@ -242,6 +243,60 @@ async function main() {
     assertEqual(client.lastEndpoint(), '/networks/ethereum/pools/0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640/transactions', 'endpoint');
     assertEqual(client.lastParams().from, '-1h', 'params.from');
     assertEqual(client.lastParams().to, 1790000000, 'params.to');
+  });
+
+  // From 23 November 2026 the API answers 400 to any query key the route does
+  // not accept. These lists are the routes' accepted keys as the API defines
+  // them (dexpaprika-go internal/doc/all/static/api-rest.yml, 16 Nov 2026).
+  const POOL_SEARCH_KEYS = new Set([
+    'created_after', 'created_before', 'cursor', 'detailed', 'dex_name', 'limit',
+    'liquidity_usd_max', 'liquidity_usd_min', 'order_by', 'sort', 'token_address',
+    'price_change_percentage_1h_max', 'price_change_percentage_1h_min',
+    'price_change_percentage_24h_max', 'price_change_percentage_24h_min',
+    'price_change_percentage_48h_max', 'price_change_percentage_48h_min',
+    'price_change_percentage_5m_max', 'price_change_percentage_5m_min',
+    'price_change_percentage_6h_max', 'price_change_percentage_6h_min',
+    'price_usd_max', 'price_usd_min', 'txns_24h_max', 'txns_24h_min',
+    'volume_usd_24h_max', 'volume_usd_24h_min', 'volume_usd_30d_max', 'volume_usd_30d_min',
+    'volume_usd_7d_max', 'volume_usd_7d_min',
+  ]);
+  const TOKEN_SEARCH_KEYS = new Set([
+    'created_after', 'created_before', 'cursor', 'detailed', 'fdv_usd_max', 'fdv_usd_min',
+    'limit', 'liquidity_usd_max', 'liquidity_usd_min', 'order_by', 'sort',
+    'price_change_percentage_24h_max', 'price_change_percentage_24h_min',
+    'price_usd_max', 'price_usd_min', 'txns_24h_max', 'txns_24h_min',
+    'volume_usd_24h_max', 'volume_usd_24h_min', 'volume_usd_30d_max', 'volume_usd_30d_min',
+    'volume_usd_7d_max', 'volume_usd_7d_min',
+  ]);
+  const unknownKeys = (params: Record<string, any>, allowed: Set<string>) =>
+    Object.keys(params).filter((k) => params[k] !== undefined && !allowed.has(k));
+
+  await test('pools.filter with every option set sends only keys pools/search accepts', async () => {
+    const client = new RecordingClient();
+    const pools = new PoolsAPI(client);
+    await pools.filter('ethereum', {
+      page: 2, cursor: 'c', limit: 5, sortBy: 'volume_usd_24h', sortDir: 'asc',
+      volume24hMin: 1, volume24hMax: 2, volume7dMin: 1, volume7dMax: 2,
+      liquidityUsdMin: 1, liquidityUsdMax: 2, txns24hMin: 1,
+      priceChange24hMin: 1, priceChange24hMax: 2, priceChange48hMin: 1, priceChange48hMax: 2,
+      priceChange6hMin: 1, priceChange6hMax: 2, priceChange1hMin: 1, priceChange1hMax: 2,
+      priceChange5mMin: 1, priceChange5mMax: 2, createdAfter: '-1d', createdBefore: '-1h',
+    } as any);
+    assertEqual(unknownKeys(client.lastParams(), POOL_SEARCH_KEYS).join(','), '', 'keys pools/search rejects');
+  });
+
+  await test('tokens.filter with every option set sends only keys tokens/search accepts', async () => {
+    const client = new RecordingClient();
+    const tokens = new TokensAPI(client);
+    await tokens.filter('ethereum', {
+      cursor: 'c', limit: 5, sortBy: 'volume_usd_24h', sortDir: 'asc',
+      volume24hMin: 1, volume24hMax: 2, liquidityUsdMin: 1, fdvMin: 1, fdvMax: 2, txns24hMin: 1,
+      priceChange24hMin: 1, priceChange24hMax: 2, createdAfter: '-1d', createdBefore: '-1h',
+    } as any);
+    const params = client.lastParams();
+    assertEqual(unknownKeys(params, TOKEN_SEARCH_KEYS).join(','), '', 'keys tokens/search rejects');
+    assertEqual(params.fdv_usd_min, 1, 'params.fdv_usd_min (from fdvMin)');
+    assertEqual(params.fdv_usd_max, 2, 'params.fdv_usd_max (from fdvMax)');
   });
 
   console.log(`\n${'='.repeat(50)}`);
