@@ -200,6 +200,10 @@ export class TokensAPI extends BaseAPI {
   /**
    * Get batch prices for multiple tokens on a network.
    *
+   * Needs an API key; a free key is enough. Without one the API answers 403
+   * `plan_required`. Pass it as `apiKey` when you build the client, or set
+   * DEXPAPRIKA_API_KEY. Free keys: https://console.dexpaprika.com
+   *
    * @param networkId - Network ID (e.g., "ethereum", "solana")
    * @param tokens - Array of token addresses (max 10)
    * @returns Array of token prices

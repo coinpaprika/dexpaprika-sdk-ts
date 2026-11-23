@@ -539,7 +539,14 @@ const gainers = await client.tokens.filter('ethereum', {
 
 ### Batch Token Prices
 
+Batch prices need an API key. A free key from [console.dexpaprika.com](https://console.dexpaprika.com) is enough; without one the API answers 403 `plan_required`. See [Using an API key](#using-an-api-key-optional) above and the [plans](https://dexpaprika.com/api/pricing).
+
 ```js
+// Build the client with your key (or set DEXPAPRIKA_API_KEY)
+const client = new DexPaprikaClient('https://api.dexpaprika.com', {}, {
+  apiKey: process.env.DEXPAPRIKA_API_KEY,
+});
+
 // Get prices for multiple tokens in one request (max 10)
 const prices = await client.tokens.getMultiPrices('ethereum', [
   '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2', // WETH
