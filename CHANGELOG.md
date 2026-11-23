@@ -2,6 +2,14 @@
 
 All notable changes to the DexPaprika SDK will be documented in this file.
 
+## [1.14.4] - 2026-11-23
+
+### Changed
+- `getMultiPrices` needs an API key. Since 18 November 2026 `GET /networks/{network}/multi/prices` answers `403 plan_required` to a call without one, and a free key is enough. The method's doc comment and the README "Batch Token Prices" example now build the client with a key. Docs only, no behaviour change.
+
+### Fixed
+- The User-Agent reported `1.14.2` on 1.14.3 because `src/version.ts` was not bumped with that release. It now matches `package.json`.
+
 ## [1.14.3] - 2026-11-16
 
 ### Fixed
