@@ -153,12 +153,13 @@ const ohlcv = await client.pools.getOHLCV(
 
 ## Using an API key (optional)
 
-**The SDK works without a key.** No signup, no card. Everything
-below is optional.
+**Most of the SDK works without a key.** No signup, no card.
+`tokens.getMultiPrices()` is the exception: it needs a key, and a free one from
+[console.dexpaprika.com](https://console.dexpaprika.com) is enough.
 
-A free key raises the monthly credit allowance. It does **not** raise the
-per-minute request limit, which is the same on both free tiers. Current figures
-are on the [rate limits page](https://docs.dexpaprika.com/knowledge-base/rate-limits).
+A free key raises both the monthly credit allowance and the per-minute request
+limit. Current figures are on the [rate limits page](https://docs.dexpaprika.com/knowledge-base/rate-limits)
+and the [pricing page](https://dexpaprika.com/api/pricing).
 
 ```ts
 import { DexPaprikaClient } from 'dexpaprika-sdk';
